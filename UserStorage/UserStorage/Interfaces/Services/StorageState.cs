@@ -1,0 +1,11 @@
+﻿using System.Collections.Generic;
+using UserStorage.Interfaces.Entities;
+
+namespace UserStorage.Interfaces.Services
+{
+    public class StorageState
+    {
+        public int LastId { get; set; }
+        public IEnumerable<User> Users { get; set; } 
+    }
+}
