@@ -31,9 +31,9 @@ namespace UserStorage.Services
             this.loader = loader;
         }
 
-        public void Add(User user)
+        public int Add(User user)
         {
-            serviceStrategy.Add(user, idGenerator);
+            return serviceStrategy.Add(user, idGenerator);
         }
 
         public void Delete(int personalId)
@@ -65,7 +65,7 @@ namespace UserStorage.Services
             StorageState state = new StorageState
             {
                 LastId = idGenerator.GenerateId().Current,
-                Users = serviceStrategy.Users
+                Users = serviceStrategy.Users.ToList()
             };
             loader.Save(state);
         }

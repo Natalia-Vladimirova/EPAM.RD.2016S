@@ -6,7 +6,7 @@ namespace UserStorage.Interfaces.Services
 {
     public interface IUserService
     {
-        void Add(User user);
+        int Add(User user);
         void Delete(int personalId);
         IEnumerable<int> SearchForUser(Func<User, bool>[] criteria);
     }

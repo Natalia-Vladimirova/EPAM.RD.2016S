@@ -12,7 +12,7 @@ namespace UserStorage.Strategies
             master.Addition += UpdateOnRemove;
         }
 
-        public override void Add(User user, IIdGenerator idGenerator)
+        public override int Add(User user, IIdGenerator idGenerator)
         {
             throw new AccessViolationException("Slave cannot write to storage.");
         }

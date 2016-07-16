@@ -28,7 +28,7 @@ namespace UserStorage.Strategies
             this.validates = validates;
         }
 
-        public override void Add(User user, IIdGenerator idGenerator)
+        public override int Add(User user, IIdGenerator idGenerator)
         {
             if (idGenerator == null)
             {
@@ -43,6 +43,7 @@ namespace UserStorage.Strategies
             user.PersonalId = idGenerator.GenerateId().Current;
             Users.Add(user);
             OnAdd(this, new UserEventArgs(user));
+            return user.PersonalId;
         }
 
         public override void Delete(int personalId)

@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -40,8 +41,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomSection\ServiceElement.cs" />
+    <Compile Include="CustomSection\ServicesCollection.cs" />
+    <Compile Include="CustomSection\StartupServicesConfigSection.cs" />
     <Compile Include="ServiceConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IdGenerator\IdGenerator.csproj">
+      <Project>{379B70A9-093D-4A36-9B43-FDA9F90C4478}</Project>
+      <Name>IdGenerator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UserStorage\UserStorage.csproj">
+      <Project>{be31ea33-f714-4124-8f5a-da7de1f87c10}</Project>
+      <Name>UserStorage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

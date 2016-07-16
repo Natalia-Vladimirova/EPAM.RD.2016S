@@ -11,7 +11,7 @@ namespace UserStorage.Strategies
     {
         public IList<User> Users { get; set; } = new List<User>();
 
-        public abstract void Add(User user, IIdGenerator idGenerator);
+        public abstract int Add(User user, IIdGenerator idGenerator);
         public abstract void Delete(int personalId);
 
         public virtual IList<int> SearchForUser(Func<User, bool>[] criteria)

@@ -2,11 +2,12 @@
 using System.Configuration;
 using System.IO;
 using System.Xml.Serialization;
+using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Services;
 
 namespace UserStorage.Services
 {
-    public class UserLoader : IUserLoader
+    public class UserXmlLoader : IUserLoader
     {
         public StorageState Load()
         {
@@ -14,6 +15,13 @@ namespace UserStorage.Services
 
             using (var stream = new FileStream(GetFileName(), FileMode.OpenOrCreate))
             {
+                if (stream.Length == 0)
+                {
+                    return new StorageState()
+                    {
+                        Users = new List<User>()
+                    };
+                }
                 return (StorageState)formatter.Deserialize(stream);
             }
         }
