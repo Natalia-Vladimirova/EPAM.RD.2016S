@@ -21,9 +21,16 @@ namespace Attributes
                 {
                     if (attr.Id == null)
                     {
-                        attr.Id = MatchParameterWithProperty(typeof(User), "id");
+                        attr.Id = MatchParameterWithProperty(typeof (User), "id");
                     }
-                    users.Add(new User(attr.Id.Value) { FirstName = attr.FirstName, LastName = attr.LastName });
+                    var ctor = typeof (User).GetConstructor(new[] {typeof (int)});
+                    if (ctor != null)
+                    {
+                        var user = (User) ctor.Invoke(new object[] { attr.Id.Value});
+                        user.FirstName = attr.FirstName;
+                        user.LastName = attr.LastName;
+                        users.Add(user);
+                    }
                 }
             }
             return users;
@@ -40,13 +47,20 @@ namespace Attributes
                 {
                     if (attr.Id == null)
                     {
-                        attr.Id = MatchParameterWithProperty(typeof(AdvancedUser), "id");
+                        attr.Id = MatchParameterWithProperty(typeof (AdvancedUser), "id");
                     }
                     if (attr.ExternalId == null)
                     {
-                        attr.ExternalId = MatchParameterWithProperty(typeof(AdvancedUser), "externalId");
+                        attr.ExternalId = MatchParameterWithProperty(typeof (AdvancedUser), "externalId");
                     }
-                    users.Add(new AdvancedUser(attr.Id.Value, attr.ExternalId.Value) { FirstName = attr.FirstName, LastName = attr.LastName });
+                    var ctor = typeof (AdvancedUser).GetConstructor(new[] {typeof (int), typeof (int)});
+                    if (ctor != null)
+                    {
+                        var user = (AdvancedUser)ctor.Invoke(new object[] { attr.Id.Value, attr.ExternalId.Value});
+                        user.FirstName = attr.FirstName;
+                        user.LastName = attr.LastName;
+                        users.Add(user);
+                    }
                 }
             }
             return users;
