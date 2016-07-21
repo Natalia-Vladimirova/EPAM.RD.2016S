@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using Configurator.CustomSection;
 using IdGenerator;
+using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.Services;
-using UserStorage.Strategies;
+using UserStorage.Loaders;
 using UserStorage.Services;
+using UserStorage.Strategies;
 
 namespace Configurator
 {
     public class ServiceConfigurator
     {
+        private IUserLoader userLoader;
         private IUserService masterService;
         private List<IUserService> slaveServices;
 
@@ -42,18 +44,17 @@ namespace Configurator
             }
 
             // create master and slaves and give them their strategies
-            // call load function in master amd slaves
-            MasterStrategy master = new MasterStrategy();
-            masterService = new UserService(master, new FibonacciIdGenerator(), new UserXmlLoader());
-            ((UserService)masterService).Load();
+            userLoader = new UserXmlLoader();
+            var storageState = userLoader.Load();
+            MasterStrategy master = new MasterStrategy(new FibonacciIdGenerator(storageState.LastId), storageState.Users);
+            masterService = new UserService(master);
 
             slaveServices = new List<IUserService>();
 
             for (int i = 0; i < slavesCount; i++)
             {
                 SlaveStrategy slave = new SlaveStrategy(master);
-                IUserService slaveService = new UserService(slave, null, new UserXmlLoader());
-                ((UserService)slaveService).Load();
+                IUserService slaveService = new UserService(slave);
                 slaveServices.Add(slaveService);
             }
         }
@@ -62,8 +63,8 @@ namespace Configurator
         {
             // TODO: unsubscribe from events ?!
 
-            // master need to save users list
-            ((UserService)masterService).Save();
+            // master need to save storage state
+            userLoader.Save(masterService.StorageState);
         }
 
     }

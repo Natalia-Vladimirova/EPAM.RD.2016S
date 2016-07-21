@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UserStorage.Interfaces.Entities;
 
-namespace UserStorage.Interfaces.Services
+namespace UserStorage.Interfaces.ServiceInfo
 {
     public class StorageState
     {

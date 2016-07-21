@@ -3,9 +3,10 @@ using System.Configuration;
 using System.IO;
 using System.Xml.Serialization;
 using UserStorage.Interfaces.Entities;
-using UserStorage.Interfaces.Services;
+using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.ServiceInfo;
 
-namespace UserStorage.Services
+namespace UserStorage.Loaders
 {
     public class UserXmlLoader : IUserLoader
     {

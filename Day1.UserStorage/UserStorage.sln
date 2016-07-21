@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStorage", "UserStorage\UserStorage.csproj", "{BE31EA33-F714-4124-8F5A-DA7DE1F87C10}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdGenerator", "IdGenerator\IdGenerator.csproj", "{379B70A9-093D-4A36-9B43-FDA9F90C4478}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configurator", "Configurator\Configurator.csproj", "{F2FF887F-8F3A-4278-B7FE-9FF5E8181D08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdGenerator.Tests", "IdGenerator.Tests\IdGenerator.Tests.csproj", "{E5AC762F-9D0D-4E84-A018-3366DC38A6F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{F2FF887F-8F3A-4278-B7FE-9FF5E8181D08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2FF887F-8F3A-4278-B7FE-9FF5E8181D08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2FF887F-8F3A-4278-B7FE-9FF5E8181D08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5AC762F-9D0D-4E84-A018-3366DC38A6F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5AC762F-9D0D-4E84-A018-3366DC38A6F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5AC762F-9D0D-4E84-A018-3366DC38A6F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5AC762F-9D0D-4E84-A018-3366DC38A6F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

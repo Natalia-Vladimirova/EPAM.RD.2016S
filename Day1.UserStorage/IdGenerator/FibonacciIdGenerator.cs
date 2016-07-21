@@ -1,14 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace IdGenerator
 {
     public class FibonacciIdGenerator : IIdGenerator
     {
-        public IEnumerator<int> GenerateId()
+        private IEnumerator<int> idGenerator;
+
+        public int CurrentId => idGenerator.Current;
+
+        public FibonacciIdGenerator()
+        {
+            idGenerator = GenerateId();
+        }
+
+        public FibonacciIdGenerator(int initialValue)
+            : this()
+        {
+            if (initialValue > 0)
+            {
+                do
+                {
+                    idGenerator.MoveNext();
+                } while (idGenerator.Current < initialValue);
+            }
+        }
+
+        public bool GenerateNextId()
+        {
+            return idGenerator.MoveNext();
+        }
+
+        private IEnumerator<int> GenerateId()
         {
             int previous = 0;
             int current = 1;

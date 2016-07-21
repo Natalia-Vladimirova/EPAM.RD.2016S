@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 
 namespace UserStorage.Services
@@ -11,6 +12,9 @@ namespace UserStorage.Services
         private readonly IUserService service;
         private readonly BooleanSwitch boolSwitch;
         private readonly TraceSource source;
+
+        public IList<User> Users => service.Users;
+        public StorageState StorageState => service.StorageState;
 
         public LogUserService(IUserService service)
         {
@@ -39,7 +43,7 @@ namespace UserStorage.Services
             service.Delete(personalId);
         }
 
-        public IEnumerable<int> SearchForUser(Func<User, bool>[] criteria)
+        public IList<int> SearchForUser(Func<User, bool>[] criteria)
         {
             if (boolSwitch.Enabled)
                 source.TraceEvent(TraceEventType.Information, 0, "Search!");
