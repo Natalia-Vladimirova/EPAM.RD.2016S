@@ -4,44 +4,40 @@ using System.Linq;
 using IdGenerator;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Loaders;
-using UserStorage.Interfaces.Strategies;
 using UserStorage.Interfaces.ServiceInfo;
+using UserStorage.Interfaces.Services;
 
-namespace UserStorage.Strategies
+namespace UserStorage.Services
 {
-    public class MasterStrategy : IMasterStrategy
+    public class MasterService : IMasterService
     {
         private readonly IIdGenerator idGenerator;
         private readonly IEnumerable<Func<User, bool>> validates = new List<Func<User, bool>>();
+        private readonly IUserLoader loader;
 
         public event EventHandler<UserEventArgs> Addition = delegate { };
         public event EventHandler<UserEventArgs> Removing = delegate { };
 
-        public IList<User> Users { get; }
-        public StorageState StorageState
-        {
-            get
-            {
-                return new StorageState
-                {
-                    LastId = idGenerator.CurrentId,
-                    Users = Users.ToList()
-                };
-            }
-        }
+        public IList<User> Users { get; private set; }
 
-        public MasterStrategy(IIdGenerator idGenerator, IList<User> users)
+        public MasterService(IIdGenerator idGenerator, IUserLoader loader)
         {
             if (idGenerator == null)
             {
                 throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
             }
             this.idGenerator = idGenerator;
-            Users = users ?? new List<User>();
+
+            if (loader == null)
+            {
+                throw new ArgumentNullException($"{nameof(loader)} must be not null.");
+            }
+            this.loader = loader;
+
         }
 
-        public MasterStrategy(IIdGenerator idGenerator, IList<User> users, IEnumerable<Func<User, bool>> validates)
-            : this(idGenerator, users)
+        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<Func<User, bool>> validates)
+            : this(idGenerator, loader)
         {
             if (validates == null)
             {
@@ -97,6 +93,22 @@ namespace UserStorage.Strategies
         {
             Removing(sender, e);
         }
-        
+
+        public void Load()
+        {
+            var storageState = loader.Load();
+            Users = storageState.Users ?? new List<User>();
+            idGenerator.SetInitialValue(storageState.LastId);
+        }
+
+        public void Save()
+        {
+            var storageState = new StorageState
+            {
+                LastId = idGenerator.CurrentId,
+                Users = Users.ToList()
+            };
+            loader.Save(storageState);
+        }
     }
 }

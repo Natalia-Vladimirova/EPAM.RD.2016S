@@ -45,7 +45,8 @@ namespace IdGenerator.Tests
         public void GenerateId_InitialValueFiveNextElement_ReturnEight()
         {
             //act
-            var generator = new FibonacciIdGenerator(5);
+            var generator = new FibonacciIdGenerator();
+            generator.SetInitialValue(5);
             generator.GenerateNextId();
 
             //assert

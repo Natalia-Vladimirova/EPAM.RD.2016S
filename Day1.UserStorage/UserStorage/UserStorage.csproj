@@ -44,17 +44,15 @@
     <Compile Include="Interfaces\Entities\Gender.cs" />
     <Compile Include="Interfaces\Entities\User.cs" />
     <Compile Include="Interfaces\Entities\Visa.cs" />
-    <Compile Include="Interfaces\Strategies\IMasterStrategy.cs" />
-    <Compile Include="Interfaces\Strategies\IServiceStrategy.cs" />
+    <Compile Include="Interfaces\Services\IMasterService.cs" />
     <Compile Include="Interfaces\Loaders\IUserLoader.cs" />
     <Compile Include="Interfaces\Services\IUserService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Interfaces\ServiceInfo\StorageState.cs" />
     <Compile Include="Services\LogUserService.cs" />
-    <Compile Include="Strategies\MasterStrategy.cs" />
-    <Compile Include="Strategies\SlaveStrategy.cs" />
+    <Compile Include="Services\MasterService.cs" />
+    <Compile Include="Services\SlaveService.cs" />
     <Compile Include="Loaders\UserXmlLoader.cs" />
-    <Compile Include="Services\UserService.cs" />
     <Compile Include="Interfaces\ServiceInfo\UserEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +61,7 @@
       <Name>IdGenerator</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

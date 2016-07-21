@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.Configuration;
 using Configurator.CustomSection;
 using IdGenerator;
-using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.Services;
 using UserStorage.Loaders;
 using UserStorage.Services;
-using UserStorage.Strategies;
 
 namespace Configurator
 {
     public class ServiceConfigurator
     {
-        private IUserLoader userLoader;
-        private IUserService masterService;
+        private IMasterService masterService;
         private List<IUserService> slaveServices;
 
         public void Start()
@@ -44,17 +41,14 @@ namespace Configurator
             }
 
             // create master and slaves and give them their strategies
-            userLoader = new UserXmlLoader();
-            var storageState = userLoader.Load();
-            MasterStrategy master = new MasterStrategy(new FibonacciIdGenerator(storageState.LastId), storageState.Users);
-            masterService = new UserService(master);
+            masterService = new MasterService(new FibonacciIdGenerator(), new UserXmlLoader());
+            masterService.Load();
 
             slaveServices = new List<IUserService>();
 
             for (int i = 0; i < slavesCount; i++)
             {
-                SlaveStrategy slave = new SlaveStrategy(master);
-                IUserService slaveService = new UserService(slave);
+                IUserService slaveService = new SlaveService(masterService);
                 slaveServices.Add(slaveService);
             }
         }
@@ -64,7 +58,7 @@ namespace Configurator
             // TODO: unsubscribe from events ?!
 
             // master need to save storage state
-            userLoader.Save(masterService.StorageState);
+            masterService.Save();
         }
 
     }

@@ -4,7 +4,7 @@ namespace IdGenerator
 {
     public class FibonacciIdGenerator : IIdGenerator
     {
-        private IEnumerator<int> idGenerator;
+        private readonly IEnumerator<int> idGenerator;
 
         public int CurrentId => idGenerator.Current;
 
@@ -13,8 +13,12 @@ namespace IdGenerator
             idGenerator = GenerateId();
         }
 
-        public FibonacciIdGenerator(int initialValue)
-            : this()
+        public bool GenerateNextId()
+        {
+            return idGenerator.MoveNext();
+        }
+
+        public void SetInitialValue(int initialValue)
         {
             if (initialValue > 0)
             {
@@ -23,11 +27,6 @@ namespace IdGenerator
                     idGenerator.MoveNext();
                 } while (idGenerator.Current < initialValue);
             }
-        }
-
-        public bool GenerateNextId()
-        {
-            return idGenerator.MoveNext();
         }
 
         private IEnumerator<int> GenerateId()

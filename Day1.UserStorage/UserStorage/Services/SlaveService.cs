@@ -1,25 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using IdGenerator;
 using UserStorage.Interfaces.Entities;
-using UserStorage.Interfaces.Strategies;
 using UserStorage.Interfaces.ServiceInfo;
+using UserStorage.Interfaces.Services;
 
-namespace UserStorage.Strategies
+namespace UserStorage.Services
 {
-    public class SlaveStrategy : IServiceStrategy
+    public class SlaveService : IUserService
     {
         public IList<User> Users { get; }
-        public StorageState StorageState
-        {
-            get
-            {
-                throw new AccessViolationException("Slave haven't got a state.");
-            }
-        }
 
-        public SlaveStrategy(IMasterStrategy master)
+        public SlaveService(IMasterService master)
         {
             if (master == null)
             {

@@ -14,7 +14,6 @@ namespace UserStorage.Services
         private readonly TraceSource source;
 
         public IList<User> Users => service.Users;
-        public StorageState StorageState => service.StorageState;
 
         public LogUserService(IUserService service)
         {

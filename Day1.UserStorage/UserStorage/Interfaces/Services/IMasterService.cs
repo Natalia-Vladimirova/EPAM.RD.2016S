@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.ServiceInfo;
 
-namespace UserStorage.Interfaces.Strategies
+namespace UserStorage.Interfaces.Services
 {
-    public interface IMasterStrategy : IServiceStrategy
+    public interface IMasterService : IUserService
     {
         event EventHandler<UserEventArgs> Addition;
         event EventHandler<UserEventArgs> Removing;
+
+        void Load();
+        void Save();
     }
 }
