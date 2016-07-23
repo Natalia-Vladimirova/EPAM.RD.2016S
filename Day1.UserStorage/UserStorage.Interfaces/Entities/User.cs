@@ -11,7 +11,7 @@ namespace UserStorage.Interfaces.Entities
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
-        public List<Visa> Visa { get; set; }
+        public List<Visa> Visas { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -26,7 +26,7 @@ namespace UserStorage.Interfaces.Entities
                 return true;
             }
 
-            if (PersonalId == user.PersonalId)
+            if (PersonalId == user.PersonalId && FirstName == user.FirstName && LastName == user.LastName)
             {
                 return true;
             }
@@ -36,8 +36,17 @@ namespace UserStorage.Interfaces.Entities
 
         public override int GetHashCode()
         {
-            return PersonalId ^ FirstName.GetHashCode() ^ LastName.GetHashCode() ^ DateOfBirth.GetHashCode() ^ Gender.GetHashCode();
+            var hashCode = PersonalId.GetHashCode();
+            if (FirstName != null)
+            {
+                hashCode ^= FirstName.GetHashCode();
+            }
+            if (LastName != null)
+            {
+                hashCode ^= LastName.GetHashCode();
+            }
+            return hashCode ^ DateOfBirth.GetHashCode() ^ Gender.GetHashCode();
         }
-
+        
     }
 }

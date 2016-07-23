@@ -1,43 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Web.Script.Serialization;
 using IdGenerator;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 using UserStorage.Interfaces.Validators;
+using System.Net.Sockets;
 
 namespace UserStorage.Services
 {
     [Serializable]
-    public class MasterService : IMasterService
+    public class MasterService : MarshalByRefObject, IMasterService
     {
         private readonly IIdGenerator idGenerator;
-        private readonly IEnumerable<IValidator> validators;
         private readonly IUserLoader loader;
-
-        public event EventHandler<UserEventArgs> Addition = delegate { };
-        public event EventHandler<UserEventArgs> Removing = delegate { };
+        private readonly IEnumerable<IValidator> validators;
+        private readonly IEnumerable<ConnectionInfo> slavesInfo;
 
         public IList<User> Users { get; private set; }
 
-        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators)
+        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo)
         {
             if (idGenerator == null)
             {
                 throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
             }
-            this.idGenerator = idGenerator;
-
             if (loader == null)
             {
                 throw new ArgumentNullException($"{nameof(loader)} must be not null.");
             }
+            if (slavesInfo == null)
+            {
+                throw new ArgumentNullException($"{nameof(slavesInfo)} must be not null.");
+            }
+            this.idGenerator = idGenerator;
             this.loader = loader;
             this.validators = validators;
+            this.slavesInfo = slavesInfo;
         }
-        
+
         public int Add(User user)
         {
             if (idGenerator == null)
@@ -52,17 +57,17 @@ namespace UserStorage.Services
             idGenerator.GenerateNextId();
             user.PersonalId = idGenerator.CurrentId;
             Users.Add(user);
-            OnAdd(this, new UserEventArgs(user));
+            NotifyAboutChanges(new ServiceMessage(user, ServiceOperation.Addition));
             return user.PersonalId;
         }
 
         public void Delete(int personalId)
         {
-            User userToRemove = Users.FirstOrDefault(u => u.PersonalId == personalId);
-            if (userToRemove != null)
+            User user = Users.FirstOrDefault(u => u.PersonalId == personalId);
+            if (user != null)
             {
-                Users.Remove(userToRemove);
-                OnDelete(this, new UserEventArgs(userToRemove));
+                Users.Remove(user);
+                NotifyAboutChanges(new ServiceMessage(user, ServiceOperation.Removing));
             }
         }
 
@@ -74,16 +79,6 @@ namespace UserStorage.Services
                 foundUsers = foundUsers.Where(cr);
             }
             return foundUsers.Select(u => u.PersonalId).ToList();
-        }
-
-        protected virtual void OnAdd(object sender, UserEventArgs e)
-        {
-            Addition(sender, e);
-        }
-
-        protected virtual void OnDelete(object sender, UserEventArgs e)
-        {
-            Removing(sender, e);
         }
 
         public void Load()
@@ -102,5 +97,35 @@ namespace UserStorage.Services
             };
             loader.Save(storageState);
         }
+
+        private void NotifyAboutChanges(ServiceMessage message)
+        {
+            var serializer = new JavaScriptSerializer();
+            foreach (var slave in slavesInfo)
+            {
+                using (TcpClient client = new TcpClient())
+                {
+
+                    string serializedMessage;
+                    try
+                    {
+                        serializedMessage = serializer.Serialize(message);
+                    }
+                    catch
+                    {
+                        throw new InvalidOperationException("Unable to deserialize request.");
+                    }
+
+                    byte[] data = Encoding.UTF8.GetBytes(serializedMessage);
+
+                    client.Connect(slave.IPAddress, slave.Port);
+                    using (NetworkStream stream = client.GetStream())
+                    {
+                        stream.Write(data, 0, data.Length);
+                    }
+                }
+            }
+        }
+
     }
 }

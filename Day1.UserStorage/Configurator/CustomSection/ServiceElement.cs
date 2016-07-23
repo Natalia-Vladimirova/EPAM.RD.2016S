@@ -18,6 +18,13 @@ namespace Configurator.CustomSection
             set { base["serviceType"] = value; }
         }
 
+        [ConfigurationProperty("ipAddress", IsRequired = true)]
+        public string IpAddress
+        {
+            get { return (string)base["ipAddress"]; }
+            set { base["ipAddress"] = value; }
+        }
+
         [ConfigurationProperty("port", IsRequired = true)]
         public int Port
         {

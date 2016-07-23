@@ -6,6 +6,6 @@ namespace UserStorage.Interfaces.ServiceInfo
     public class StorageState
     {
         public int LastId { get; set; }
-        public List<User> Users { get; set; } 
+        public List<User> Users { get; set; }
     }
 }
