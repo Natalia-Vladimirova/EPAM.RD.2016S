@@ -43,7 +43,9 @@
   <ItemGroup>
     <Compile Include="CustomSection\ServiceElement.cs" />
     <Compile Include="CustomSection\ServicesCollection.cs" />
+    <Compile Include="CustomSection\StartupServiceElement.cs" />
     <Compile Include="CustomSection\StartupServicesConfigSection.cs" />
+    <Compile Include="CustomSection\ValidatorsCollection.cs" />
     <Compile Include="ServiceConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

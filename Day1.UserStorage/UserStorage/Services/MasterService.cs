@@ -6,13 +6,14 @@ using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
+using UserStorage.Interfaces.Validators;
 
 namespace UserStorage.Services
 {
     public class MasterService : IMasterService
     {
         private readonly IIdGenerator idGenerator;
-        private readonly IEnumerable<Func<User, bool>> validates = new List<Func<User, bool>>();
+        private readonly IEnumerable<IValidator> validators;
         private readonly IUserLoader loader;
 
         public event EventHandler<UserEventArgs> Addition = delegate { };
@@ -20,7 +21,7 @@ namespace UserStorage.Services
 
         public IList<User> Users { get; private set; }
 
-        public MasterService(IIdGenerator idGenerator, IUserLoader loader)
+        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators)
         {
             if (idGenerator == null)
             {
@@ -33,19 +34,9 @@ namespace UserStorage.Services
                 throw new ArgumentNullException($"{nameof(loader)} must be not null.");
             }
             this.loader = loader;
-
+            this.validators = validators;
         }
-
-        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<Func<User, bool>> validates)
-            : this(idGenerator, loader)
-        {
-            if (validates == null)
-            {
-                throw new ArgumentNullException($"{nameof(validates)} must be not null.");
-            }
-            this.validates = validates;
-        }
-
+        
         public int Add(User user)
         {
             if (idGenerator == null)
@@ -53,7 +44,7 @@ namespace UserStorage.Services
                 throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
             }
 
-            if (validates.Any(validate => !validate(user)))
+            if (validators?.Any(validator => !validator.IsValid(user)) ?? false)
             {
                 throw new ArgumentException($"{nameof(user)} is not valid.");
             }

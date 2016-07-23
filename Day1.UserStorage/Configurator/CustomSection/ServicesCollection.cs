@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
 namespace Configurator.CustomSection
 {
     [ConfigurationCollection(typeof(ServiceElement), AddItemName = "Service")]
     public class ServicesCollection : ConfigurationElementCollection
     {
+        public ServiceElement this[int index] => (ServiceElement)BaseGet(index);
+
         protected override ConfigurationElement CreateNewElement()
         {
             return new ServiceElement();
@@ -17,13 +14,7 @@ namespace Configurator.CustomSection
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((ServiceElement)(element)).ServiceType;
+            return ((ServiceElement)element).ServiceType;
         }
-
-        public ServiceElement this[int index]
-        {
-            get { return (ServiceElement)BaseGet(index); }
-        }
-
     }
 }

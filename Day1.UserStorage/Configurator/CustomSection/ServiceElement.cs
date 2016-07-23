@@ -1,25 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
 namespace Configurator.CustomSection
 {
     public class ServiceElement : ConfigurationElement
     {
-        [ConfigurationProperty("serviceType", DefaultValue = "", IsKey = true, IsRequired = true)]
+        [ConfigurationProperty("serviceName", IsKey = true, IsRequired = true)]
+        public string ServiceName
+        {
+            get { return (string)base["serviceName"]; }
+            set { base["serviceName"] = value; }
+        }
+
+        [ConfigurationProperty("serviceType", IsKey = false, IsRequired = true)]
         public string ServiceType
         {
-            get { return ((string)(base["serviceType"])); }
+            get { return (string)base["serviceType"]; }
             set { base["serviceType"] = value; }
         }
 
-        [ConfigurationProperty("count", DefaultValue = 0, IsKey = false, IsRequired = true)]
+        [ConfigurationProperty("count", IsKey = false, IsRequired = true)]
         public int Count
         {
-            get { return ((int)(base["count"])); }
+            get { return (int)base["count"]; }
             set { base["count"] = value; }
         }
     }
