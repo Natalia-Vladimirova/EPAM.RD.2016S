@@ -18,7 +18,6 @@ namespace Configurator
 
         public void Start()
         {
-            // read from config
             StartupServicesConfigSection servicesSection = (StartupServicesConfigSection)ConfigurationManager.GetSection("StartupServices");
 
             if (servicesSection == null)
@@ -47,13 +46,13 @@ namespace Configurator
             {
                 if (servicesSection.Services[i].IsMaster)
                 {
-                    var generator = CreateIdGenerator(servicesSection.IdGenerator.Type);
-                    var loader = CreateUserLoader(servicesSection.Loader.Type);
+                    var generator = CreateInstance<IIdGenerator>(servicesSection.IdGenerator.Type);
+                    var loader = CreateInstance<IUserLoader>(servicesSection.Loader.Type);
                     var validators = new List<IValidator>();
 
                     for (int j = 0; j < servicesSection.Validators.Count; j++)
                     {
-                        validators.Add(CreateValidator(servicesSection.Validators[j].Type));
+                        validators.Add(CreateInstance<IValidator>(servicesSection.Validators[j].Type));
                     }
 
                     masterService = CreateMasterService(servicesSection.Services[i].ServiceType, generator, loader, validators);
@@ -85,17 +84,11 @@ namespace Configurator
             {
                 throw new NullReferenceException($"Type {serviceType} not found.");
             }
-
-            if (type.GetInterface("IMasterService") == null)
+            
+            if (type.GetInterface(typeof(IMasterService).Name) == null || 
+                type.GetConstructor(new[] { typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>) }) == null)
             {
-                throw new ArgumentException($"Type {serviceType} doesn't implement interface {nameof(IMasterService)}.");
-            }
-
-            var ctor = type.GetConstructor(new[] { typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>) });
-
-            if (ctor == null)
-            {
-                throw new ArgumentException($"Type {serviceType} doesn't have necessary constructor.");
+                throw new ArgumentException($"Unable to create service of type '{serviceType}' implementing interface '{nameof(IMasterService)}'.");
             }
 
             AppDomain appDomain = AppDomain.CreateDomain("Master");
@@ -111,94 +104,7 @@ namespace Configurator
             }
             return master;
         }
-
-        private IIdGenerator CreateIdGenerator(string generatorType)
-        {
-            if (generatorType == null)
-            {
-                throw new ArgumentNullException($"{nameof(generatorType)} must be not null.");
-            }
-
-            Type type = Type.GetType(generatorType);
-
-            if (type == null)
-            {
-                throw new NullReferenceException($"Type {generatorType} not found.");
-            }
-
-            if (type.GetInterface("IIdGenerator") == null)
-            {
-                throw new ArgumentException($"Type {generatorType} doesn't implement interface {nameof(IIdGenerator)}.");
-            }
-
-            var ctor = type.GetConstructor(new Type[] {});
-
-            if (ctor == null)
-            {
-                throw new ArgumentException($"Type {generatorType} doesn't have necessary constructor.");
-            }
-
-            return (IIdGenerator) ctor.Invoke(new object[] {});
-        }
-
-        private IUserLoader CreateUserLoader(string loaderType)
-        {
-            if (loaderType == null)
-            {
-                throw new ArgumentNullException($"{nameof(loaderType)} must be not null.");
-            }
-
-            Type type = Type.GetType(loaderType);
-
-            if (type == null)
-            {
-                throw new NullReferenceException($"Type {loaderType} not found.");
-            }
-
-            if (type.GetInterface("IUserLoader") == null)
-            {
-                throw new ArgumentException($"Type {loaderType} doesn't implement interface {nameof(IUserLoader)}.");
-            }
-
-            var ctor = type.GetConstructor(new Type[] { });
-
-            if (ctor == null)
-            {
-                throw new ArgumentException($"Type {loaderType} doesn't have necessary constructor.");
-            }
-
-            return (IUserLoader)ctor.Invoke(new object[] { });
-        }
-
-        private IValidator CreateValidator(string validatorType)
-        {
-            if (validatorType == null)
-            {
-                throw new ArgumentNullException($"{nameof(validatorType)} must be not null.");
-            }
-
-            Type type = Type.GetType(validatorType);
-
-            if (type == null)
-            {
-                throw new NullReferenceException($"Type {validatorType} not found.");
-            }
-
-            if (type.GetInterface("IValidator") == null)
-            {
-                throw new ArgumentException($"Type {validatorType} doesn't implement interface {nameof(IValidator)}.");
-            }
-
-            var ctor = type.GetConstructor(new Type[] { });
-
-            if (ctor == null)
-            {
-                throw new ArgumentException($"Type {validatorType} doesn't have necessary constructor.");
-            }
-
-            return (IValidator)ctor.Invoke(new object[] { });
-        }
-
+        
         private IUserService CreateSlaveService(string serviceType, int slaveIndex, IMasterService master)
         {
             if (serviceType == null)
@@ -213,16 +119,9 @@ namespace Configurator
                 throw new NullReferenceException($"Type {serviceType} not found.");
             }
 
-            if (type.GetInterface("IUserService") == null)
+            if (type.GetInterface(typeof(IUserService).Name) == null || type.GetConstructor(new[] { typeof(IMasterService) }) == null)
             {
-                throw new ArgumentException($"Type {serviceType} doesn't implement interface {nameof(IUserService)}.");
-            }
-
-            var ctor = type.GetConstructor(new[] { typeof(IMasterService) });
-
-            if (ctor == null)
-            {
-                throw new ArgumentException($"Type {serviceType} doesn't have necessary constructor.");
+                throw new ArgumentException($"Unable to create service of type '{serviceType}' implementing interface '{nameof(IUserService)}'.");
             }
 
             AppDomain appDomain = AppDomain.CreateDomain($"Slave{slaveIndex}");
@@ -232,8 +131,33 @@ namespace Configurator
                 new object[] { master },
                 CultureInfo.InvariantCulture, null);
 
+            if (slave == null)
+            {
+                throw new ConfigurationErrorsException($"Unable to load domain of slave service #{slaveIndex}.");
+            }
             return slave;
         }
 
+        private T CreateInstance<T>(string instanceType)
+        {
+            if (instanceType == null)
+            {
+                throw new ArgumentNullException($"{nameof(instanceType)} must be not null.");
+            }
+
+            Type type = Type.GetType(instanceType);
+
+            if (type == null)
+            {
+                throw new NullReferenceException($"Type '{instanceType}' not found.");
+            }
+
+            if (type.GetInterface(typeof(T).Name) == null || type.GetConstructor(new Type[] { }) == null)
+            {
+                throw new ArgumentException($"Unable to create instance of type '{instanceType}' implementing interface '{typeof(T).Name}'.");
+            }
+
+            return (T)Activator.CreateInstance(type);
+        }
     }
 }
