@@ -22,7 +22,7 @@ namespace ConsoleUI
 
             //var t = new LogUserService(new SlaveService(new MasterService(new FibonacciIdGenerator(), new UserXmlLoader())));
             //t.Add(new User {FirstName = "jhk" });
-            //Console.ReadLine();
+            Console.ReadLine();
         }
     }
 }

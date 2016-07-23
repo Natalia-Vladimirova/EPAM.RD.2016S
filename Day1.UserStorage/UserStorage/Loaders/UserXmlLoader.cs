@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Xml.Serialization;
@@ -8,6 +9,7 @@ using UserStorage.Interfaces.ServiceInfo;
 
 namespace UserStorage.Loaders
 {
+    [Serializable]
     public class UserXmlLoader : IUserLoader
     {
         public StorageState Load()

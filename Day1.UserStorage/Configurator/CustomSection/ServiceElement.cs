@@ -4,25 +4,25 @@ namespace Configurator.CustomSection
 {
     public class ServiceElement : ConfigurationElement
     {
-        [ConfigurationProperty("serviceName", IsKey = true, IsRequired = true)]
-        public string ServiceName
+        [ConfigurationProperty("isMaster", DefaultValue = false, IsRequired = false)]
+        public bool IsMaster
         {
-            get { return (string)base["serviceName"]; }
-            set { base["serviceName"] = value; }
+            get { return (bool)base["isMaster"]; }
+            set { base["isMaster"] = value; }
         }
 
-        [ConfigurationProperty("serviceType", IsKey = false, IsRequired = true)]
+        [ConfigurationProperty("serviceType", IsRequired = true)]
         public string ServiceType
         {
             get { return (string)base["serviceType"]; }
             set { base["serviceType"] = value; }
         }
 
-        [ConfigurationProperty("count", IsKey = false, IsRequired = true)]
-        public int Count
+        [ConfigurationProperty("port", IsRequired = true)]
+        public int Port
         {
-            get { return (int)base["count"]; }
-            set { base["count"] = value; }
+            get { return (int)base["port"]; }
+            set { base["port"] = value; }
         }
     }
 }

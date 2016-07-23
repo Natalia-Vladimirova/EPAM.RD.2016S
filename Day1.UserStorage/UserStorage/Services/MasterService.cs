@@ -10,6 +10,7 @@ using UserStorage.Interfaces.Validators;
 
 namespace UserStorage.Services
 {
+    [Serializable]
     public class MasterService : IMasterService
     {
         private readonly IIdGenerator idGenerator;
@@ -44,7 +45,7 @@ namespace UserStorage.Services
                 throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
             }
 
-            if (validators?.Any(validator => !validator.IsValid(user)) ?? false)
+            if (validators?.Any(validator => !validator?.IsValid(user) ?? false) ?? false)
             {
                 throw new ArgumentException($"{nameof(user)} is not valid.");
             }

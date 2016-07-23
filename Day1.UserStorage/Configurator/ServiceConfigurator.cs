@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Reflection;
 using Configurator.CustomSection;
 using IdGenerator;
 using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.Services;
 using UserStorage.Interfaces.Validators;
+using System.Globalization;
 
 namespace Configurator
 {
@@ -24,48 +26,44 @@ namespace Configurator
                 throw new NullReferenceException("Unable to read section from config.");
             }
 
-            int slavesCount = 0;
-            string masterType = null;
-            string slaveType = null;
+            int masterCount = 0;
 
             for (int i = 0; i < servicesSection.Services.Count; i++)
             {
-                // validate number of master (only one - good, in other case - exception)
-                if (servicesSection.Services[i].ServiceName == "Master")
+                if (servicesSection.Services[i].IsMaster)
                 {
-                    if (servicesSection.Services[i].Count != 1)
-                    {
-                        throw new ConfigurationErrorsException("Count of masters must be one.");
-                    }
-                    masterType = servicesSection.Services[i].ServiceType;
-                }
-
-                if (servicesSection.Services[i].ServiceName == "Slave")
-                {
-                    slavesCount = servicesSection.Services[i].Count;
-                    slaveType = servicesSection.Services[i].ServiceType;
+                    masterCount++;
                 }
             }
 
-            var generator = CreateIdGenerator(servicesSection.IdGenerator.Type);
-            var loader = CreateUserLoader(servicesSection.Loader.Type);
-            var validators = new List<IValidator>();
-
-            for (int i = 0; i < servicesSection.Validators.Count; i++)
+            if (masterCount != 1)
             {
-                validators.Add(CreateValidator(servicesSection.Validators[i].Type));
+                throw new ConfigurationErrorsException("Count of masters must be one.");
             }
-
-            // create master and slaves and give them their strategies
-            masterService = CreateMasterService(masterType, generator, loader, validators);
-            ((IMasterService)masterService).Load();
 
             slaveServices = new List<IUserService>();
 
-            for (int i = 0; i < slavesCount; i++)
+            for (int i = 0; i < servicesSection.Services.Count; i++)
             {
-                IUserService slaveService = CreateSlaveService(slaveType, (IMasterService)masterService);
-                slaveServices.Add(slaveService);
+                if (servicesSection.Services[i].IsMaster)
+                {
+                    var generator = CreateIdGenerator(servicesSection.IdGenerator.Type);
+                    var loader = CreateUserLoader(servicesSection.Loader.Type);
+                    var validators = new List<IValidator>();
+
+                    for (int j = 0; j < servicesSection.Validators.Count; j++)
+                    {
+                        validators.Add(CreateValidator(servicesSection.Validators[j].Type));
+                    }
+
+                    masterService = CreateMasterService(servicesSection.Services[i].ServiceType, generator, loader, validators);
+                    ((IMasterService)masterService).Load();
+                }
+                else
+                {
+                    IUserService slaveService = CreateSlaveService(servicesSection.Services[i].ServiceType, i, (IMasterService)masterService);
+                    slaveServices.Add(slaveService);
+                }
             }
         }
 
@@ -93,14 +91,25 @@ namespace Configurator
                 throw new ArgumentException($"Type {serviceType} doesn't implement interface {nameof(IMasterService)}.");
             }
 
-            var ctor = type.GetConstructor(new [] { typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>) });
+            var ctor = type.GetConstructor(new[] { typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>) });
 
             if (ctor == null)
             {
                 throw new ArgumentException($"Type {serviceType} doesn't have necessary constructor.");
             }
 
-            return (IMasterService)ctor.Invoke(new object[] { generator, loader, validators });
+            AppDomain appDomain = AppDomain.CreateDomain("Master");
+
+            var master = (IMasterService)appDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName, true,
+                BindingFlags.CreateInstance, null,
+                new object[] { generator, loader, validators },
+                CultureInfo.InvariantCulture, null);
+
+            if (master == null)
+            {
+                throw new ConfigurationErrorsException("Unable to load domain of master service.");
+            }
+            return master;
         }
 
         private IIdGenerator CreateIdGenerator(string generatorType)
@@ -190,7 +199,7 @@ namespace Configurator
             return (IValidator)ctor.Invoke(new object[] { });
         }
 
-        private IUserService CreateSlaveService(string serviceType, IMasterService master)
+        private IUserService CreateSlaveService(string serviceType, int slaveIndex, IMasterService master)
         {
             if (serviceType == null)
             {
@@ -215,8 +224,15 @@ namespace Configurator
             {
                 throw new ArgumentException($"Type {serviceType} doesn't have necessary constructor.");
             }
-            
-            return (IUserService)ctor.Invoke(new object[] { master });
+
+            AppDomain appDomain = AppDomain.CreateDomain($"Slave{slaveIndex}");
+
+            var slave = (IUserService)appDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName, true,
+                BindingFlags.CreateInstance, null,
+                new object[] { master },
+                CultureInfo.InvariantCulture, null);
+
+            return slave;
         }
 
     }

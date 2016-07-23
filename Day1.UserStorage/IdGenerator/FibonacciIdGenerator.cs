@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace IdGenerator
 {
+    [Serializable]
     public class FibonacciIdGenerator : IIdGenerator
     {
         private readonly IEnumerator<int> idGenerator;
@@ -10,7 +13,7 @@ namespace IdGenerator
 
         public FibonacciIdGenerator()
         {
-            idGenerator = GenerateId();
+            idGenerator = new FibonacciIterator();
         }
 
         public bool GenerateNextId()
@@ -29,17 +32,40 @@ namespace IdGenerator
             }
         }
 
-        private IEnumerator<int> GenerateId()
+        [Serializable]
+        private class FibonacciIterator : IEnumerator<int>
         {
-            int previous = 0;
-            int current = 1;
-
-            while (true)
+            private int previous = 0;
+            private int next = 1;
+            private int current = -1;
+            
+            public int Current
             {
-                int next = previous + current;
-                previous = current;
-                current = next;
-                yield return current;
+                get
+                {
+                    if (current == -1)
+                    {
+                        throw new InvalidOperationException($"{nameof(Current)} is unreachable.");
+                    }
+                    return current;
+                }
+            }
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose() { }
+
+            public bool MoveNext()
+            {
+                current = previous + next;
+                previous = next;
+                next = current;
+                return true;
+            }
+
+            public void Reset()
+            {
+                current = -1;
             }
         }
     }

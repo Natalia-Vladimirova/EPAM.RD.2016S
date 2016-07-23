@@ -7,6 +7,7 @@ using UserStorage.Interfaces.Services;
 
 namespace UserStorage.Services
 {
+    [Serializable]
     public class LogUserService : IUserService
     {
         private readonly IUserService service;
