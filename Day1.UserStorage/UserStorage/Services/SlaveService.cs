@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Web.Script.Serialization;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.ServiceInfo;
@@ -13,25 +14,19 @@ namespace UserStorage.Services
     [Serializable]
     public class SlaveService : MarshalByRefObject, ISlaveService
     {
-        private TcpListener server = null;
-        public IList<User> Users { get; }
+        private readonly TcpListener server = null;
+        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
-        public SlaveService(IMasterService master, ConnectionInfo info)
+        public IList<User> Users { get; private set; }
+
+        public SlaveService(ConnectionInfo info)
         {
-            //if (master == null)
-            //{
-            //    throw new ArgumentNullException($"{nameof(master)} must be not null.");
-            //}
-
             if (info?.IPAddress == null)
             {
                 throw new ArgumentException($"{nameof(info)} is invalid.");
             }
-
             server = new TcpListener(info.IPAddress, info.Port);
             server.Start();
-            
-            Users = master?.Users ?? new List<User>();
         }
 
         public int Add(User user)
@@ -46,16 +41,66 @@ namespace UserStorage.Services
 
         public IList<int> SearchForUser(Func<User, bool>[] criteria)
         {
-            IEnumerable<User> foundUsers = Users;
-            foreach (var cr in criteria)
+            readerWriterLock.EnterReadLock();
+            try
             {
-                foundUsers = foundUsers.Where(cr);
+                IEnumerable<User> foundUsers = Users;
+                foreach (var cr in criteria)
+                {
+                    foundUsers = foundUsers.Where(cr);
+                }
+                return foundUsers.Select(u => u.PersonalId).ToList();
             }
-            return foundUsers.Select(u => u.PersonalId).ToList();
+            finally
+            {
+                readerWriterLock.ExitReadLock();
+            }
+        }
+
+        async public void InitializeUsers()
+        {
+            try
+            {
+                using (TcpClient client = await server.AcceptTcpClientAsync())
+                using (NetworkStream stream = client.GetStream())
+                {
+                    Console.WriteLine($"Initializing {AppDomain.CurrentDomain.FriendlyName}");
+
+                    string serializedMessage = string.Empty;
+                    byte[] data = new byte[1024];
+
+                    while (stream.DataAvailable)
+                    {
+                        int i = await stream.ReadAsync(data, 0, data.Length);
+                        serializedMessage += Encoding.UTF8.GetString(data, 0, i);
+                    }
+
+                    var serializer = new JavaScriptSerializer();
+
+                    readerWriterLock.EnterWriteLock();
+                    try
+                    {
+                        Users = serializer.Deserialize<List<User>>(serializedMessage) ?? new List<User>();
+                    }
+                    catch
+                    {
+                        throw new InvalidOperationException("Unable to deserialize request.");
+                    }
+                    finally
+                    {
+                        readerWriterLock.ExitWriteLock();
+                    }
+                }
+            }
+            catch
+            {
+                server.Stop();
+            }
         }
 
         async public void ListenForUpdates()
         {
+            var serializer = new JavaScriptSerializer();
             try
             {
                 while (true)
@@ -63,7 +108,7 @@ namespace UserStorage.Services
                     using (TcpClient client = await server.AcceptTcpClientAsync())
                     using (NetworkStream stream = client.GetStream())
                     {
-                        Console.Write($"{AppDomain.CurrentDomain.FriendlyName} connected!");
+                        Console.WriteLine($"{AppDomain.CurrentDomain.FriendlyName} connected!");
 
                         string serializedMessage = string.Empty;
                         byte[] data = new byte[1024];
@@ -75,20 +120,24 @@ namespace UserStorage.Services
                         }
 
                         ServiceMessage message;
+                        readerWriterLock.EnterWriteLock();
                         try
                         {
-                            var serializer = new JavaScriptSerializer();
                             message = serializer.Deserialize<ServiceMessage>(serializedMessage);
+                            UpdateOnModifying(message);
                         }
                         catch
                         {
                             throw new InvalidOperationException("Unable to deserialize request.");
                         }
-                        UpdateOnModifying(message);
+                        finally
+                        {
+                            readerWriterLock.ExitWriteLock();
+                        }
                     }
                 }
             }
-            finally
+            catch
             {
                 server.Stop();
             }

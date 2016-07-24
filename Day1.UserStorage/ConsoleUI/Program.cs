@@ -9,6 +9,8 @@ using UserStorage.Interfaces.Entities;
 using UserStorage.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.Services;
+using System.Threading;
 
 namespace ConsoleUI
 {
@@ -23,12 +25,45 @@ namespace ConsoleUI
 
             var configurator = new ServiceConfigurator();
             configurator.Start();
-            configurator.masterService.Add(new User { FirstName = "Test", LastName = "qwerty" });
+            configurator.MasterService.Add(new User { FirstName = "Test", LastName = "qwerty" });
+            ShowUsers(configurator.MasterService.Users);
+            Console.WriteLine();
+            Thread.Sleep(1000);
+            ShowSlaves(configurator.SlaveServices);
 
             //var t = new LogUserService(new SlaveService(new MasterService(new FibonacciIdGenerator(), new UserXmlLoader())));
-            //t.Add(new User {FirstName = "jhk" });
             Console.WriteLine("Ready!");
             Console.ReadLine();
+        }
+
+        static void ShowSlaves(IEnumerable<IUserService> slaves)
+        {
+            foreach (var slave in slaves)
+            {
+                ShowUsers(slave.Users);
+                Console.WriteLine();
+            }
+        }
+
+        static void ShowUsers(IEnumerable<User> users)
+        {
+            foreach (var user in users)
+            {
+                Console.WriteLine($"{user.PersonalId})\t{user.FirstName} {user.LastName}; {user.Gender}; {user.DateOfBirth}");
+                Console.Write($"Visas: ");
+
+                if (user.Visas == null)
+                {
+                    Console.WriteLine("no visas");
+                    return;
+                }
+
+                foreach (var visa in user.Visas)
+                {
+                    Console.Write($"{visa.Country}  ");
+                }
+                Console.WriteLine();
+            }
         }
 
         static void SaveExample()

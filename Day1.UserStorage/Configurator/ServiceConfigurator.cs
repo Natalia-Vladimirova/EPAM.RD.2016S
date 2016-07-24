@@ -9,14 +9,13 @@ using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 using UserStorage.Interfaces.Validators;
-using System.Net;
 
 namespace Configurator
 {
     public class ServiceConfigurator
     {
-        public IUserService masterService;
-        public List<IUserService> slaveServices;
+        public IUserService MasterService { get; private set; }
+        public List<IUserService> SlaveServices { get; private set; }
 
         public void Start()
         {
@@ -42,7 +41,7 @@ namespace Configurator
                 throw new ConfigurationErrorsException("Count of masters must be one.");
             }
 
-            slaveServices = new List<IUserService>();
+            SlaveServices = new List<IUserService>();
             string masterType = string.Empty;
             var slavesInfo = new List<ConnectionInfo>();
 
@@ -54,9 +53,10 @@ namespace Configurator
                 }
                 else
                 {
-                    ISlaveService slaveService = CreateSlaveService(servicesSection.Services[i], i, (IMasterService)masterService);
-                    slaveServices.Add(slaveService);
+                    ISlaveService slaveService = CreateSlaveService(servicesSection.Services[i], i);
+                    SlaveServices.Add(slaveService);
                     slavesInfo.Add(new ConnectionInfo(servicesSection.Services[i].IpAddress, servicesSection.Services[i].Port));
+                    slaveService.InitializeUsers();
                     slaveService.ListenForUpdates();
                 }
             }
@@ -70,13 +70,13 @@ namespace Configurator
                 validators.Add(CreateInstance<IValidator>(servicesSection.Validators[j].Type));
             }
             
-            masterService = CreateMasterService(masterType, generator, loader, validators, slavesInfo);
-            ((IMasterService)masterService).Load();
+            MasterService = CreateMasterService(masterType, generator, loader, validators, slavesInfo);
+            ((IMasterService)MasterService).Load();
         }
 
         public void End()
         {
-            ((IMasterService)masterService).Save();
+            ((IMasterService)MasterService).Save();
         }
 
         private IMasterService CreateMasterService(string serviceType, IIdGenerator generator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo)
@@ -113,7 +113,7 @@ namespace Configurator
             return master;
         }
         
-        private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex, IMasterService master)
+        private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex)
         {
             if (service.ServiceType == null)
             {
@@ -128,7 +128,7 @@ namespace Configurator
             }
 
             if (type.GetInterface(typeof(ISlaveService).Name) == null || 
-                type.GetConstructor(new[] { typeof(IMasterService), typeof(ConnectionInfo) }) == null)
+                type.GetConstructor(new[] { typeof(ConnectionInfo) }) == null)
             {
                 throw new ArgumentException($"Unable to create service of type '{service.ServiceType}' implementing interface '{nameof(ISlaveService)}'.");
             }
@@ -137,7 +137,7 @@ namespace Configurator
 
             var slave = (ISlaveService)appDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName, true,
                 BindingFlags.CreateInstance, null,
-                new object[] { master, new ConnectionInfo(service.IpAddress, service.Port) },
+                new object[] { new ConnectionInfo(service.IpAddress, service.Port) },
                 CultureInfo.InvariantCulture, null);
 
             if (slave == null)

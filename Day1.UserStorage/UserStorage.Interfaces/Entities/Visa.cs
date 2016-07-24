@@ -2,6 +2,7 @@
 
 namespace UserStorage.Interfaces.Entities
 {
+    [Serializable]
     public struct Visa
     {
         public string Country { get; set; }
