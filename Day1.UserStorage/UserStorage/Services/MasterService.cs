@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
-using IdGenerator;
 using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.Generators;
 using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
@@ -22,6 +23,7 @@ namespace UserStorage.Services
         private readonly IEnumerable<IValidator> validators;
         private readonly IEnumerable<ConnectionInfo> slavesInfo;
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
+        private readonly LogService logger = LogService.Instance;
 
         public IList<User> Users { get; private set; }
 
@@ -29,31 +31,31 @@ namespace UserStorage.Services
         {
             if (idGenerator == null)
             {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(idGenerator)}.");
                 throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
             }
             if (loader == null)
             {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(loader)}.");
                 throw new ArgumentNullException($"{nameof(loader)} must be not null.");
             }
             if (slavesInfo == null)
             {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(slavesInfo)}.");
                 throw new ArgumentNullException($"{nameof(slavesInfo)} must be not null.");
             }
             this.idGenerator = idGenerator;
             this.loader = loader;
-            this.validators = validators;
+            this.validators = validators ?? new List<IValidator>();
             this.slavesInfo = slavesInfo;
+            logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
 
         public int Add(User user)
         {
-            if (idGenerator == null)
+            if (validators.Any(validator => !validator?.IsValid(user) ?? false))
             {
-                throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
-            }
-
-            if (validators?.Any(validator => !validator?.IsValid(user) ?? false) ?? false)
-            {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tattempted addition of invalid user.");
                 throw new ArgumentException($"{nameof(user)} is not valid.");
             }
             readerWriterLock.EnterWriteLock();
@@ -62,6 +64,7 @@ namespace UserStorage.Services
                 idGenerator.GenerateNextId();
                 user.PersonalId = idGenerator.CurrentId;
                 Users.Add(user);
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser added (id: {idGenerator.CurrentId}).");
             }
             finally
             {
@@ -80,6 +83,7 @@ namespace UserStorage.Services
                 if (user != null)
                 {
                     Users.Remove(user);
+                    logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser removed (id: {user.PersonalId}).");
                     SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Removing));
                 }
             }
@@ -99,6 +103,7 @@ namespace UserStorage.Services
                 {
                     foundUsers = foundUsers.Where(cr);
                 }
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search.");
                 return foundUsers.Select(u => u.PersonalId).ToList();
             }
             finally
@@ -115,7 +120,7 @@ namespace UserStorage.Services
                 var storageState = loader.Load();
                 Users = storageState.Users ?? new List<User>();
                 idGenerator.SetInitialValue(storageState.LastId);
-                SendMessageToSlaves(Users);
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tservice state loaded.");
             }
             finally
             {
@@ -134,6 +139,7 @@ namespace UserStorage.Services
                     Users = Users.ToList()
                 };
                 loader.Save(storageState);
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tservice state saved.");
             }
             finally
             {
@@ -156,6 +162,7 @@ namespace UserStorage.Services
                     {
                         stream.Write(data, 0, data.Length);
                     }
+                    logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmessage was sent to {slave.IPAddress}:{slave.Port}.");
                 }
             }
         }

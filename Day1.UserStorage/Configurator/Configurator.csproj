@@ -50,10 +50,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IdGenerator\IdGenerator.csproj">
-      <Project>{379B70A9-093D-4A36-9B43-FDA9F90C4478}</Project>
-      <Name>IdGenerator</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
       <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
       <Name>UserStorage.Interfaces</Name>

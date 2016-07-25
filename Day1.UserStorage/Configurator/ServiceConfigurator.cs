@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Globalization;
 using System.Reflection;
 using Configurator.CustomSection;
-using IdGenerator;
+using UserStorage.Interfaces.Generators;
 using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
@@ -45,6 +45,10 @@ namespace Configurator
             string masterType = string.Empty;
             var slavesInfo = new List<ConnectionInfo>();
 
+            var generator = CreateInstance<IIdGenerator>(servicesSection.IdGenerator.Type);
+            var loader = CreateInstance<IUserLoader>(servicesSection.Loader.Type);
+            var validators = new List<IValidator>();
+
             for (int i = 0; i < servicesSection.Services.Count; i++)
             {
                 if (servicesSection.Services[i].IsMaster)
@@ -53,17 +57,12 @@ namespace Configurator
                 }
                 else
                 {
-                    ISlaveService slaveService = CreateSlaveService(servicesSection.Services[i], i);
+                    ISlaveService slaveService = CreateSlaveService(servicesSection.Services[i], i, loader);
                     SlaveServices.Add(slaveService);
                     slavesInfo.Add(new ConnectionInfo(servicesSection.Services[i].IpAddress, servicesSection.Services[i].Port));
-                    slaveService.InitializeUsers();
                     slaveService.ListenForUpdates();
                 }
             }
-
-            var generator = CreateInstance<IIdGenerator>(servicesSection.IdGenerator.Type);
-            var loader = CreateInstance<IUserLoader>(servicesSection.Loader.Type);
-            var validators = new List<IValidator>();
 
             for (int j = 0; j < servicesSection.Validators.Count; j++)
             {
@@ -113,7 +112,7 @@ namespace Configurator
             return master;
         }
         
-        private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex)
+        private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex, IUserLoader loader)
         {
             if (service.ServiceType == null)
             {
@@ -128,7 +127,7 @@ namespace Configurator
             }
 
             if (type.GetInterface(typeof(ISlaveService).Name) == null || 
-                type.GetConstructor(new[] { typeof(ConnectionInfo) }) == null)
+                type.GetConstructor(new[] { typeof(ConnectionInfo), typeof(IUserLoader) }) == null)
             {
                 throw new ArgumentException($"Unable to create service of type '{service.ServiceType}' implementing interface '{nameof(ISlaveService)}'.");
             }
@@ -137,7 +136,7 @@ namespace Configurator
 
             var slave = (ISlaveService)appDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName, true,
                 BindingFlags.CreateInstance, null,
-                new object[] { new ConnectionInfo(service.IpAddress, service.Port) },
+                new object[] { new ConnectionInfo(service.IpAddress, service.Port), loader },
                 CultureInfo.InvariantCulture, null);
 
             if (slave == null)

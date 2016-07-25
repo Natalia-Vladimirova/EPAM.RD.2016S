@@ -41,8 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FibonacciIdGenerator.cs" />
-    <Compile Include="IIdGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
+      <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
+      <Name>UserStorage.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

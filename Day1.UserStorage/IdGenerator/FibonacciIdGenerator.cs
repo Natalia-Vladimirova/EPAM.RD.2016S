@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UserStorage.Interfaces.Generators;
 
 namespace IdGenerator
 {
@@ -57,7 +58,10 @@ namespace IdGenerator
 
             public bool MoveNext()
             {
-                current = previous + next;
+                checked
+                {
+                    current = previous + next;
+                }
                 previous = next;
                 next = current;
                 return true;

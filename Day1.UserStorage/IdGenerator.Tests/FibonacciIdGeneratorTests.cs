@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IdGenerator.Tests
 {
@@ -51,6 +52,14 @@ namespace IdGenerator.Tests
 
             //assert
             Assert.AreEqual(8, generator.CurrentId);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OverflowException))]
+        public void GenerateId_InitialValueMaxInt_ThrowAnException()
+        {
+            var generator = new FibonacciIdGenerator();
+            generator.SetInitialValue(int.MaxValue);
         }
     }
 }

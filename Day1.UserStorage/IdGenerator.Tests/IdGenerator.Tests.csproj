@@ -58,6 +58,10 @@
       <Project>{379b70a9-093d-4a36-9b43-fda9f90c4478}</Project>
       <Name>IdGenerator</Name>
     </ProjectReference>
+    <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
+      <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
+      <Name>UserStorage.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

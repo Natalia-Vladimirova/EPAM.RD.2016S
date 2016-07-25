@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -50,14 +51,27 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="AuxilaryInfo.cs" />
+    <Compile Include="MasterServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SlaveServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\IdGenerator\IdGenerator.csproj">
+      <Project>{379b70a9-093d-4a36-9b43-fda9f90c4478}</Project>
+      <Name>IdGenerator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
+      <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
+      <Name>UserStorage.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UserStorage\UserStorage.csproj">
       <Project>{be31ea33-f714-4124-8f5a-da7de1f87c10}</Project>
       <Name>UserStorage</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

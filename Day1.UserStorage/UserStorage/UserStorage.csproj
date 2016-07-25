@@ -43,17 +43,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\LogUserService.cs" />
+    <Compile Include="Services\LogService.cs" />
     <Compile Include="Services\MasterService.cs" />
     <Compile Include="Services\SlaveService.cs" />
     <Compile Include="Loaders\UserXmlLoader.cs" />
     <Compile Include="Validators\NameValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IdGenerator\IdGenerator.csproj">
-      <Project>{379b70a9-093d-4a36-9b43-fda9f90c4478}</Project>
-      <Name>IdGenerator</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
       <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
       <Name>UserStorage.Interfaces</Name>
