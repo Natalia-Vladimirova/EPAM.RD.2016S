@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace UserStorage.Interfaces.Entities
 {
     [Serializable]
-    public class User
+    public class User : IXmlSerializable
     {
         public int PersonalId { get; set; }
         public string FirstName { get; set; }
@@ -47,6 +50,34 @@ namespace UserStorage.Interfaces.Entities
             }
             return hashCode ^ DateOfBirth.GetHashCode() ^ Gender.GetHashCode();
         }
-        
+
+        public XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public void ReadXml(XmlReader reader)
+        {
+            reader.ReadStartElement(nameof(User));
+            PersonalId = reader.ReadElementContentAsInt();
+            FirstName = reader.ReadElementContentAsString();
+            LastName = reader.ReadElementContentAsString();
+            DateOfBirth = reader.ReadElementContentAsDateTime();
+            Gender = (Gender)reader.ReadElementContentAsInt();
+            var serializer = new XmlSerializer(typeof(List<Visa>));
+            Visas = (List<Visa>)serializer.Deserialize(reader);
+            reader.ReadEndElement();
+        }
+
+        public void WriteXml(XmlWriter writer)
+        {
+            writer.WriteElementString(nameof(PersonalId), PersonalId.ToString());
+            writer.WriteElementString(nameof(FirstName), FirstName);
+            writer.WriteElementString(nameof(LastName), LastName);
+            writer.WriteElementString(nameof(DateOfBirth), DateOfBirth.ToString("yyyy-MM-dd"));
+            writer.WriteElementString(nameof(Gender), ((int)Gender).ToString());
+            var serializer = new XmlSerializer(typeof(List<Visa>));
+            serializer.Serialize(writer, Visas);
+        }
     }
 }

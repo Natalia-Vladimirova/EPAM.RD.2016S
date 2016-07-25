@@ -49,7 +49,6 @@
     <Compile Include="ServiceInfo\ServiceMessage.cs" />
     <Compile Include="ServiceInfo\ServiceOperation.cs" />
     <Compile Include="ServiceInfo\StorageState.cs" />
-    <Compile Include="ServiceInfo\UserEventArgs.cs" />
     <Compile Include="Services\IMasterService.cs" />
     <Compile Include="Services\ISlaveService.cs" />
     <Compile Include="Services\IUserService.cs" />
