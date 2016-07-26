@@ -18,12 +18,17 @@ namespace UserStorage.Services
     {
         private readonly TcpListener server;
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
-        private readonly LogService logger = LogService.Instance;
+        private readonly ILogService logger;
 
         public IList<User> Users { get; }
 
-        public SlaveService(ConnectionInfo info, IUserLoader loader)
+        public SlaveService(ConnectionInfo info, IUserLoader loader, ILogService logger)
         {
+            if (logger == null)
+            {
+                throw new ArgumentNullException($"{nameof(logger)} must be not null.");
+            }
+            this.logger = logger;
             if (info == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(info)}.");
@@ -72,8 +77,9 @@ namespace UserStorage.Services
                 {
                     foundUsers = foundUsers.Where(cr);
                 }
-                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search.");
-                return foundUsers.Select(u => u.PersonalId).ToList();
+                var foundIds = foundUsers.Select(u => u.PersonalId).ToList();
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundIds.Count} found).");
+                return foundIds;
             }
             finally
             {

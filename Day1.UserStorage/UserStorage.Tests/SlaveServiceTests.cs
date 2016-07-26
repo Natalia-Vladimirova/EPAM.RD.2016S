@@ -16,14 +16,14 @@ namespace UserStorage.Tests
         [ExpectedException(typeof(ArgumentNullException))]
         public void Slave_Ctor_NullConnectionInfo_ThrowAnException()
         {
-            new SlaveService(null, null);
+            new SlaveService(null, null, LogService.Instance);
         }
 
         [TestMethod]
         [ExpectedException(typeof(AccessViolationException))]
         public void Slave_Add_ThrowAnException()
         {
-            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader());
+            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader(), LogService.Instance);
             slave.Add(null);
         }
 
@@ -31,7 +31,7 @@ namespace UserStorage.Tests
         [ExpectedException(typeof(AccessViolationException))]
         public void Slave_Delete_ThrowAnException()
         {
-            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader());
+            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader(), LogService.Instance);
             slave.Delete(1);
         }
 
@@ -39,7 +39,7 @@ namespace UserStorage.Tests
         public void Slave_SearchForUser_OneCriteria_ReturnFirstUserId()
         {
             // act
-            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader());
+            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader(), LogService.Instance);
             var user = slave.Users.First();
             var foundUsers = slave.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName });
 

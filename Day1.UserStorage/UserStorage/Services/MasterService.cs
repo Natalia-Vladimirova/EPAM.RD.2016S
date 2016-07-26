@@ -23,12 +23,17 @@ namespace UserStorage.Services
         private readonly IEnumerable<IValidator> validators;
         private readonly IEnumerable<ConnectionInfo> slavesInfo;
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
-        private readonly LogService logger = LogService.Instance;
+        private readonly ILogService logger;
 
         public IList<User> Users { get; private set; }
 
-        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo)
+        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo, ILogService logger)
         {
+            if (logger == null)
+            {
+                throw new ArgumentNullException($"{nameof(logger)} must be not null.");
+            }
+            this.logger = logger;
             if (idGenerator == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(idGenerator)}.");
@@ -65,13 +70,13 @@ namespace UserStorage.Services
                 user.PersonalId = idGenerator.CurrentId;
                 Users.Add(user);
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser added (id: {idGenerator.CurrentId}).");
+                SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Addition));
+                return user.PersonalId;
             }
             finally
             {
                 readerWriterLock.ExitWriteLock();
             }
-            SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Addition));
-            return user.PersonalId;
         }
 
         public void Delete(int personalId)
@@ -103,8 +108,9 @@ namespace UserStorage.Services
                 {
                     foundUsers = foundUsers.Where(cr);
                 }
-                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search.");
-                return foundUsers.Select(u => u.PersonalId).ToList();
+                var foundIds = foundUsers.Select(u => u.PersonalId).ToList();
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundIds.Count} found).");
+                return foundIds;
             }
             finally
             {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStorage", "UserStorage\UserStorage.csproj", "{BE31EA33-F714-4124-8F5A-DA7DE1F87C10}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdGenerator.Tests", "IdGenerator.Tests\IdGenerator.Tests.csproj", "{E5AC762F-9D0D-4E84-A018-3366DC38A6F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStorage.Interfaces", "UserStorage.Interfaces\UserStorage.Interfaces.csproj", "{38537E77-6D9A-4837-A01D-A78155CE44FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiThreadingExample", "MultiThreadingExample\MultiThreadingExample.csproj", "{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{38537E77-6D9A-4837-A01D-A78155CE44FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38537E77-6D9A-4837-A01D-A78155CE44FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38537E77-6D9A-4837-A01D-A78155CE44FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

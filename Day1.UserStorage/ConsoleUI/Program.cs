@@ -1,72 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Configurator;
-using IdGenerator;
-using UserStorage.Interfaces.Entities;
-using UserStorage.Loaders;
-using UserStorage.Interfaces.ServiceInfo;
-using UserStorage.Interfaces.Loaders;
-using UserStorage.Interfaces.Services;
 using System.Threading;
+using Configurator;
+using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.ServiceInfo;
+using UserStorage.Interfaces.Services;
+using UserStorage.Loaders;
 
 namespace ConsoleUI
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        private static volatile bool endWork;
+
+        private static void Main(string[] args)
         {
-            //SaveExample();
-
-            //var loader = new UserXmlLoader();
-            //var state = loader.Load();
-
+            SaveExample();
+            
+            List<Thread> threads = new List<Thread>();
             var configurator = new ServiceConfigurator();
             configurator.Start();
-            configurator.MasterService.Add(new User { FirstName = "Test", LastName = "qwerty" });
-            ShowUsers(configurator.MasterService.Users);
-            Console.WriteLine();
-            Thread.Sleep(1000);
-            ShowSlaves(configurator.SlaveServices);
 
-            //var t = new LogUserService(new SlaveService(new MasterService(new FibonacciIdGenerator(), new UserXmlLoader())));
-            Console.WriteLine("Ready!");
+            threads.Add(new Thread(() => WorkMaster(configurator.MasterService)));
+            threads.AddRange(configurator.SlaveServices.Select(slave => new Thread(() => WorkSlave(slave))));
+            
+            foreach (Thread thread in threads)
+            {
+                thread.Start();
+            }
+            
+            Console.WriteLine("Press any key to end work of services.");
+            Console.ReadKey();
+            endWork = true;
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+            configurator.End();
+
+            Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
         }
 
-        static void ShowSlaves(IEnumerable<IUserService> slaves)
+        private static void WorkMaster(IUserService master)
         {
-            foreach (var slave in slaves)
+            while (!endWork)
             {
-                ShowUsers(slave.Users);
-                Console.WriteLine();
+                master.Add(new User { FirstName = "Test", LastName = "LTest" });
+                int firstId = master.SearchForUser(new Func<User, bool>[] {u => true}).FirstOrDefault();
+                master.Delete(firstId);
+                Thread.Sleep(1000);
             }
         }
 
-        static void ShowUsers(IEnumerable<User> users)
+        private static void WorkSlave(IUserService slave)
         {
-            foreach (var user in users)
+            while (!endWork)
             {
-                Console.WriteLine($"{user.PersonalId})\t{user.FirstName} {user.LastName}; {user.Gender}; {user.DateOfBirth}");
-                Console.Write($"Visas: ");
-
-                if (user.Visas == null)
-                {
-                    Console.WriteLine("no visas");
-                    return;
-                }
-
-                foreach (var visa in user.Visas)
-                {
-                    Console.Write($"{visa.Country}  ");
-                }
-                Console.WriteLine();
+                slave.SearchForUser(new Func<User, bool>[] { u => u.FirstName == "Test" });
+                Thread.Sleep(1000);
             }
         }
-
-        static void SaveExample()
+        
+        private static void SaveExample()
         {
             var loader = new UserXmlLoader();
 

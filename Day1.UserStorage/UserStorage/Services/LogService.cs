@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using UserStorage.Interfaces.Services;
 
 namespace UserStorage.Services
 {
-    public sealed class LogService
+    public sealed class LogService : MarshalByRefObject, ILogService
     {
         private readonly BooleanSwitch boolSwitch;
         private readonly TraceSource source;
@@ -23,7 +25,9 @@ namespace UserStorage.Services
         public void Log(TraceEventType traceEventType, string message)
         {
             if (boolSwitch.Enabled)
+            {
                 source.TraceEvent(traceEventType, 0, message);
+            }
         }
 
     }
