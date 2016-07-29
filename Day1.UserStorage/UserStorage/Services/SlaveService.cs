@@ -20,25 +20,26 @@ namespace UserStorage.Services
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
 
-        public IList<User> Users { get; }
-
         public SlaveService(ConnectionInfo info, IUserLoader loader, ILogService logger)
         {
             if (logger == null)
             {
                 throw new ArgumentNullException($"{nameof(logger)} must be not null.");
             }
+
             this.logger = logger;
             if (info == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(info)}.");
                 throw new ArgumentNullException($"{nameof(info)} must be not null.");
             }
+
             if (loader == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(loader)}.");
                 throw new ArgumentNullException($"{nameof(loader)} must be not null.");
             }
+
             readerWriterLock.EnterWriteLock();
             try
             {
@@ -50,8 +51,11 @@ namespace UserStorage.Services
             {
                 readerWriterLock.ExitWriteLock();
             }
+
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tslave service created.");
         }
+
+        public IList<User> Users { get; }
 
         public int Add(User user)
         {
@@ -77,6 +81,7 @@ namespace UserStorage.Services
                 {
                     foundUsers = foundUsers.Where(cr);
                 }
+
                 var foundIds = foundUsers.Select(u => u.PersonalId).ToList();
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundIds.Count} found).");
                 return foundIds;
@@ -146,6 +151,5 @@ namespace UserStorage.Services
                     break;
             }
         }
-        
     }
 }

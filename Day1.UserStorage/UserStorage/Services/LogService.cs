@@ -9,14 +9,9 @@ namespace UserStorage.Services
         private readonly BooleanSwitch boolSwitch;
         private readonly TraceSource source;
 
-        private class Nested
-        {
-            public static readonly LogService Service = new LogService();
-        }
-        
         private LogService()
         {
-            boolSwitch = new BooleanSwitch("Switch", "");
+            boolSwitch = new BooleanSwitch("Switch", string.Empty);
             source = new TraceSource("Source");
         }
 
@@ -30,5 +25,9 @@ namespace UserStorage.Services
             }
         }
 
+        private class Nested
+        {
+            public static readonly LogService Service = new LogService();
+        }
     }
 }

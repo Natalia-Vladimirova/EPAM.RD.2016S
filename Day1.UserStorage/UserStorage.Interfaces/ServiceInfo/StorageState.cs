@@ -9,6 +9,7 @@ namespace UserStorage.Interfaces.ServiceInfo
     public class StorageState : IXmlSerializable
     {
         public int LastId { get; set; }
+
         public List<User> Users { get; set; }
 
         public XmlSchema GetSchema()

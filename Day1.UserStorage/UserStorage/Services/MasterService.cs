@@ -25,36 +25,40 @@ namespace UserStorage.Services
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
 
-        public IList<User> Users { get; private set; }
-
         public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo, ILogService logger)
         {
             if (logger == null)
             {
                 throw new ArgumentNullException($"{nameof(logger)} must be not null.");
             }
+
             this.logger = logger;
             if (idGenerator == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(idGenerator)}.");
                 throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
             }
+
             if (loader == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(loader)}.");
                 throw new ArgumentNullException($"{nameof(loader)} must be not null.");
             }
+
             if (slavesInfo == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(slavesInfo)}.");
                 throw new ArgumentNullException($"{nameof(slavesInfo)} must be not null.");
             }
+
             this.idGenerator = idGenerator;
             this.loader = loader;
             this.validators = validators ?? new List<IValidator>();
             this.slavesInfo = slavesInfo;
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
+
+        public IList<User> Users { get; private set; }
 
         public int Add(User user)
         {
@@ -63,6 +67,7 @@ namespace UserStorage.Services
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tattempted addition of invalid user.");
                 throw new ArgumentException($"{nameof(user)} is not valid.");
             }
+
             readerWriterLock.EnterWriteLock();
             try
             {
@@ -108,6 +113,7 @@ namespace UserStorage.Services
                 {
                     foundUsers = foundUsers.Where(cr);
                 }
+
                 var foundIds = foundUsers.Select(u => u.PersonalId).ToList();
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundIds.Count} found).");
                 return foundIds;
@@ -168,10 +174,10 @@ namespace UserStorage.Services
                     {
                         stream.Write(data, 0, data.Length);
                     }
+
                     logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmessage was sent to {slave.IPAddress}:{slave.Port}.");
                 }
             }
         }
-        
     }
 }

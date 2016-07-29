@@ -17,7 +17,7 @@ namespace MultiThreadingExample
             
             threads.Add(new Thread(() =>
             {
-                configurator.MasterService.Add(new User {FirstName = "Test", LastName = "qwerty"});
+                configurator.MasterService.Add(new User { FirstName = "Test", LastName = "qwerty" });
             }));
 
             threads.Add(new Thread(() =>

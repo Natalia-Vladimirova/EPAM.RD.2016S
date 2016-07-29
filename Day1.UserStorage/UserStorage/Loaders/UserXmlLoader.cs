@@ -25,6 +25,7 @@ namespace UserStorage.Loaders
                         Users = new List<User>()
                     };
                 }
+
                 return (StorageState)formatter.Deserialize(stream);
             }
         }
@@ -50,7 +51,5 @@ namespace UserStorage.Loaders
 
             return fileName;
         }
-
     }
 }
-

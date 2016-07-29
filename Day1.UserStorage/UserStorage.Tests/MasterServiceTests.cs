@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IdGenerator;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Services;
@@ -14,7 +14,7 @@ namespace UserStorage.Tests
     public class MasterServiceTests
     {
         [TestMethod]
-        [ExpectedException(typeof (ArgumentNullException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void Master_Ctor_NullIdGenerator_ThrowAnException()
         {
             new MasterService(null, null, null, null, LogService.Instance);
@@ -48,7 +48,7 @@ namespace UserStorage.Tests
             // act
             var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
             master.Load();
-            master.Add(new User { FirstName = testFirstName, LastName = testLastName, DateOfBirth = testDateTime, Gender = Gender.Female});
+            master.Add(new User { FirstName = testFirstName, LastName = testLastName, DateOfBirth = testDateTime, Gender = Gender.Female });
 
             // assert
             Assert.AreEqual(generator.CurrentId, master.Users.Last().PersonalId);
@@ -78,10 +78,10 @@ namespace UserStorage.Tests
             var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
             master.Load();
             var user = master.Users.First();
-            var foundUsers = master.SearchForUser(new Func<User, bool>[] {u => u.LastName == user.LastName});
+            var foundUsers = master.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName });
 
             // assert
-            CollectionAssert.AreEqual(new List<int> {user.PersonalId}, foundUsers.ToList());
+            CollectionAssert.AreEqual(new List<int> { user.PersonalId }, foundUsers.ToList());
         }
 
         [TestMethod]
@@ -91,11 +91,10 @@ namespace UserStorage.Tests
             var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
             master.Load();
             var user = master.Users.First();
-            var foundUsers = master.SearchForUser(new Func<User, bool>[] {u => u.LastName == user.LastName, u => u.PersonalId == user.PersonalId + 1});
+            var foundUsers = master.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName, u => u.PersonalId == user.PersonalId + 1 });
 
             // assert
             CollectionAssert.AreEqual(new List<int>(), foundUsers.ToList());
         }
-
     }
 }

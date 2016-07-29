@@ -10,12 +10,12 @@ namespace IdGenerator
     {
         private readonly IEnumerator<int> idGenerator;
 
-        public int CurrentId => idGenerator.Current;
-
         public FibonacciIdGenerator()
         {
             idGenerator = new FibonacciIterator();
         }
+
+        public int CurrentId => idGenerator.Current;
 
         public bool GenerateNextId()
         {
@@ -29,7 +29,8 @@ namespace IdGenerator
                 do
                 {
                     idGenerator.MoveNext();
-                } while (idGenerator.Current < initialValue);
+                }
+                while (idGenerator.Current < initialValue);
             }
         }
 
@@ -48,13 +49,16 @@ namespace IdGenerator
                     {
                         throw new InvalidOperationException($"{nameof(Current)} is unreachable.");
                     }
+
                     return current;
                 }
             }
 
             object IEnumerator.Current => Current;
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
 
             public bool MoveNext()
             {
@@ -62,6 +66,7 @@ namespace IdGenerator
                 {
                     current = previous + next;
                 }
+
                 previous = next;
                 next = current;
                 return true;

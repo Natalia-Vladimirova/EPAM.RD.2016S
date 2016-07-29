@@ -6,9 +6,6 @@ namespace UserStorage.Interfaces.ServiceInfo
     [Serializable]
     public class ConnectionInfo
     {
-        public IPAddress IPAddress { get; }
-        public int Port { get; }
-
         public ConnectionInfo(string ipAddress, int port)
         {
             IPAddress address;
@@ -16,8 +13,13 @@ namespace UserStorage.Interfaces.ServiceInfo
             {
                 throw new ArgumentException($"{nameof(ipAddress)} is invalid.");
             }
+
             IPAddress = address;
             Port = port;
         }
+
+        public IPAddress IPAddress { get; }
+
+        public int Port { get; }
     }
 }

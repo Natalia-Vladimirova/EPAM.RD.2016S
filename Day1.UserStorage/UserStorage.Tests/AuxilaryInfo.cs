@@ -9,7 +9,21 @@ namespace UserStorage.Tests
 {
     public static class AuxilaryInfo
     {
-        private static List<User> TestUsers { get; } = new List<User>
+        public static StorageState TestState => new StorageState
+        {
+            LastId = 2,
+            Users = TestUsers.Select(u => new User
+            {
+                PersonalId = u.PersonalId,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                DateOfBirth = u.DateOfBirth,
+                Gender = u.Gender,
+                Visas = u.Visas
+            }).ToList()
+        };
+
+        private static List<User> TestUsers => new List<User>
         {
             new User
             {
@@ -45,28 +59,15 @@ namespace UserStorage.Tests
             }
         };
 
-        public static StorageState TestState { get; } = new StorageState
-        {
-            LastId = 2,
-            Users = TestUsers.Select(u => new User
-            {
-                PersonalId = u.PersonalId,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                DateOfBirth = u.DateOfBirth,
-                Gender = u.Gender,
-                Visas = u.Visas
-            }).ToList()
-        };
-
         public class TestLoader : IUserLoader
         {
-            private StorageState storageState => TestState;
+            private StorageState StorageState => TestState;
 
-            public StorageState Load() => storageState;
+            public StorageState Load() => StorageState;
 
-            public void Save(StorageState state) { }
+            public void Save(StorageState state)
+            {
+            }
         }
-
     }
 }

@@ -46,6 +46,5 @@ namespace UserStorage.Tests
             // assert
             CollectionAssert.AreEqual(new List<int> { user.PersonalId }, foundUsers.ToList());
         }
-        
     }
 }

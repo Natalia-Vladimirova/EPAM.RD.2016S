@@ -9,48 +9,48 @@ namespace IdGenerator.Tests
         [TestMethod]
         public void GenerateId_FirstElement_ReturnOne()
         {
-            //act
+            // act
             var generator = new FibonacciIdGenerator();
             generator.GenerateNextId();
 
-            //assert
+            // assert
             Assert.AreEqual(1, generator.CurrentId);
         }
 
         [TestMethod]
         public void GenerateId_SecondElement_ReturnTwo()
         {
-            //act
+            // act
             var generator = new FibonacciIdGenerator();
             generator.GenerateNextId();
             generator.GenerateNextId();
 
-            //assert
+            // assert
             Assert.AreEqual(2, generator.CurrentId);
         }
 
         [TestMethod]
         public void GenerateId_FirstElement_ReturnThree()
         {
-            //act
+            // act
             var generator = new FibonacciIdGenerator();
             generator.GenerateNextId();
             generator.GenerateNextId();
             generator.GenerateNextId();
 
-            //assert
+            // assert
             Assert.AreEqual(3, generator.CurrentId);
         }
 
         [TestMethod]
         public void GenerateId_InitialValueFiveNextElement_ReturnEight()
         {
-            //act
+            // act
             var generator = new FibonacciIdGenerator();
             generator.SetInitialValue(5);
             generator.GenerateNextId();
 
-            //assert
+            // assert
             Assert.AreEqual(8, generator.CurrentId);
         }
 

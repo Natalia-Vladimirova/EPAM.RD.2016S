@@ -10,10 +10,15 @@ namespace UserStorage.Interfaces.Entities
     public class User : IXmlSerializable
     {
         public int PersonalId { get; set; }
+
         public string FirstName { get; set; }
+
         public string LastName { get; set; }
+
         public DateTime DateOfBirth { get; set; }
+
         public Gender Gender { get; set; }
+
         public List<Visa> Visas { get; set; }
 
         public override bool Equals(object obj)
@@ -44,10 +49,12 @@ namespace UserStorage.Interfaces.Entities
             {
                 hashCode ^= FirstName.GetHashCode();
             }
+
             if (LastName != null)
             {
                 hashCode ^= LastName.GetHashCode();
             }
+
             return hashCode ^ DateOfBirth.GetHashCode() ^ Gender.GetHashCode();
         }
 

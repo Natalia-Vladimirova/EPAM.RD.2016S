@@ -38,6 +38,7 @@ namespace ConsoleUI
             {
                 thread.Join();
             }
+
             configurator.End();
 
             Console.WriteLine("Press any key to exit.");
@@ -49,7 +50,7 @@ namespace ConsoleUI
             while (!endWork)
             {
                 master.Add(new User { FirstName = "Test", LastName = "LTest" });
-                int firstId = master.SearchForUser(new Func<User, bool>[] {u => true}).FirstOrDefault();
+                int firstId = master.SearchForUser(new Func<User, bool>[] { u => true }).FirstOrDefault();
                 master.Delete(firstId);
                 Thread.Sleep(1000);
             }
@@ -129,6 +130,5 @@ namespace ConsoleUI
 
             loader.Save(state);
         }
-
     }
 }

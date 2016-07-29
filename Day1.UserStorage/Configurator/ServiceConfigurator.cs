@@ -16,6 +16,7 @@ namespace Configurator
     public class ServiceConfigurator
     {
         public IUserService MasterService { get; private set; }
+
         public List<IUserService> SlaveServices { get; private set; }
 
         public void Start()
@@ -92,27 +93,37 @@ namespace Configurator
             {
                 throw new NullReferenceException($"Type {serviceType} not found.");
             }
-            
-            if (type.GetInterface(typeof(IMasterService).Name) == null || 
-                type.GetConstructor(new[] { typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>), typeof(IEnumerable<ConnectionInfo>), typeof(ILogService) }) == null)
+
+            if (type.GetInterface(typeof(IMasterService).Name) == null ||
+                type.GetConstructor(new[]
+                {
+                    typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>),
+                    typeof(IEnumerable<ConnectionInfo>), typeof(ILogService)
+                }) == null)
             {
                 throw new ArgumentException($"Unable to create service of type '{serviceType}' implementing interface '{nameof(IMasterService)}'.");
             }
 
             AppDomain appDomain = AppDomain.CreateDomain("Master");
 
-            var master = (IMasterService)appDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName, true,
-                BindingFlags.CreateInstance, null,
+            var master = (IMasterService)appDomain.CreateInstanceAndUnwrap(
+                type.Assembly.FullName, 
+                type.FullName, 
+                true,
+                BindingFlags.CreateInstance, 
+                null,
                 new object[] { generator, loader, validators, slavesInfo, logService },
-                CultureInfo.InvariantCulture, null);
+                CultureInfo.InvariantCulture,
+                null);
 
             if (master == null)
             {
                 throw new ConfigurationErrorsException("Unable to load domain of master service.");
             }
+
             return master;
         }
-        
+
         private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex, IUserLoader loader, ILogService logService)
         {
             if (service.ServiceType == null)
@@ -135,15 +146,21 @@ namespace Configurator
 
             AppDomain appDomain = AppDomain.CreateDomain($"Slave{slaveIndex}");
 
-            var slave = (ISlaveService)appDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName, true,
-                BindingFlags.CreateInstance, null,
+            var slave = (ISlaveService)appDomain.CreateInstanceAndUnwrap(
+                type.Assembly.FullName, 
+                type.FullName, 
+                true,
+                BindingFlags.CreateInstance, 
+                null, 
                 new object[] { new ConnectionInfo(service.IpAddress, service.Port), loader, logService },
-                CultureInfo.InvariantCulture, null);
+                CultureInfo.InvariantCulture, 
+                null);
 
             if (slave == null)
             {
                 throw new ConfigurationErrorsException($"Unable to load domain of slave service #{slaveIndex}.");
             }
+
             return slave;
         }
 

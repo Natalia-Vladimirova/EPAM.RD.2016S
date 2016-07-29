@@ -6,15 +6,18 @@ namespace UserStorage.Interfaces.ServiceInfo
     [Serializable]
     public class ServiceMessage
     {
-        public User User { get; set; }
-        public ServiceOperation Operation { get; set; }
-
-        public ServiceMessage() { }
+        public ServiceMessage()
+        {
+        }
 
         public ServiceMessage(User user, ServiceOperation operation)
         {
             User = user;
             Operation = operation;
         }
+
+        public User User { get; set; }
+
+        public ServiceOperation Operation { get; set; }
     }
 }
