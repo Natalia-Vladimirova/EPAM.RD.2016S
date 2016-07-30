@@ -1,14 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using IdGenerator;
 using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.Generators;
 using UserStorage.Interfaces.Loaders;
 using UserStorage.Interfaces.ServiceInfo;
+using UserStorage.Interfaces.Services;
+using UserStorage.Interfaces.Validators;
+using UserStorage.Services;
 
 namespace UserStorage.Tests
 {
     public static class AuxilaryInfo
     {
+        private static Dictionary<Type, string> typesSingle = new Dictionary<Type, string>
+        {
+            { typeof(IIdGenerator), typeof(FibonacciIdGenerator).AssemblyQualifiedName },
+            { typeof(IUserLoader), typeof(TestLoader).AssemblyQualifiedName },
+            { typeof(ILogService), typeof(LogService).AssemblyQualifiedName },
+        };
+
+        public static IDependencyCreator Creator => new DependencyCreator(
+            typesSingle,
+            new Dictionary<Type, List<string>>
+            {
+                { typeof(IValidator), null }
+            });
+
         public static StorageState TestState => new StorageState
         {
             LastId = 2,

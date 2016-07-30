@@ -38,7 +38,7 @@ namespace Configurator
                 }
             }
 
-            if (masterCount != 1)
+            if (masterCount > 1)
             {
                 throw new ConfigurationErrorsException("Count of masters must be one.");
             }
@@ -46,11 +46,14 @@ namespace Configurator
             SlaveServices = new List<IUserService>();
             string masterType = string.Empty;
             var slavesInfo = new List<ConnectionInfo>();
+            
+            var dependencies = new Dictionary<Type, string>();
+            dependencies.Add(typeof(IIdGenerator), servicesSection.IdGenerator.Type);
+            dependencies.Add(typeof(IUserLoader), servicesSection.Loader.Type);
+            dependencies.Add(typeof(ILogService), servicesSection.Logger.Type);
 
-            var generator = CreateInstance<IIdGenerator>(servicesSection.IdGenerator.Type);
-            var loader = CreateInstance<IUserLoader>(servicesSection.Loader.Type);
-            var validators = new List<IValidator>();
-
+            var validators = new List<string>();
+            
             for (int i = 0; i < servicesSection.Services.Count; i++)
             {
                 if (servicesSection.Services[i].IsMaster)
@@ -59,7 +62,7 @@ namespace Configurator
                 }
                 else
                 {
-                    ISlaveService slaveService = CreateSlaveService(servicesSection.Services[i], i, loader, LogService.Instance);
+                    ISlaveService slaveService = CreateSlaveService(servicesSection.Services[i], i, new DependencyCreator(dependencies, null));
                     SlaveServices.Add(slaveService);
                     slavesInfo.Add(new ConnectionInfo(servicesSection.Services[i].IpAddress, servicesSection.Services[i].Port));
                     slaveService.ListenForUpdates();
@@ -68,10 +71,10 @@ namespace Configurator
 
             for (int j = 0; j < servicesSection.Validators.Count; j++)
             {
-                validators.Add(CreateInstance<IValidator>(servicesSection.Validators[j].Type));
+                validators.Add(servicesSection.Validators[j].Type);
             }
             
-            MasterService = CreateMasterService(masterType, generator, loader, validators, slavesInfo, LogService.Instance);
+            MasterService = CreateMasterService(masterType, new DependencyCreator(dependencies, new Dictionary<Type, List<string>> { { typeof(IValidator), validators } }), slavesInfo);
             ((IMasterService)MasterService).Load();
         }
 
@@ -80,7 +83,7 @@ namespace Configurator
             ((IMasterService)MasterService).Save();
         }
 
-        private IMasterService CreateMasterService(string serviceType, IIdGenerator generator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo, ILogService logService)
+        private IMasterService CreateMasterService(string serviceType, IDependencyCreator creator, IEnumerable<ConnectionInfo> slavesInfo)
         {
             if (serviceType == null)
             {
@@ -95,11 +98,7 @@ namespace Configurator
             }
 
             if (type.GetInterface(typeof(IMasterService).Name) == null ||
-                type.GetConstructor(new[]
-                {
-                    typeof(IIdGenerator), typeof(IUserLoader), typeof(IEnumerable<IValidator>),
-                    typeof(IEnumerable<ConnectionInfo>), typeof(ILogService)
-                }) == null)
+                type.GetConstructor(new[] { typeof(IDependencyCreator), typeof(IEnumerable<ConnectionInfo>) }) == null)
             {
                 throw new ArgumentException($"Unable to create service of type '{serviceType}' implementing interface '{nameof(IMasterService)}'.");
             }
@@ -112,7 +111,7 @@ namespace Configurator
                 true,
                 BindingFlags.CreateInstance, 
                 null,
-                new object[] { generator, loader, validators, slavesInfo, logService },
+                new object[] { creator, slavesInfo },
                 CultureInfo.InvariantCulture,
                 null);
 
@@ -124,7 +123,7 @@ namespace Configurator
             return master;
         }
 
-        private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex, IUserLoader loader, ILogService logService)
+        private ISlaveService CreateSlaveService(ServiceElement service, int slaveIndex, IDependencyCreator creator)
         {
             if (service.ServiceType == null)
             {
@@ -139,7 +138,7 @@ namespace Configurator
             }
 
             if (type.GetInterface(typeof(ISlaveService).Name) == null || 
-                type.GetConstructor(new[] { typeof(ConnectionInfo), typeof(IUserLoader), typeof(ILogService) }) == null)
+                type.GetConstructor(new[] { typeof(IDependencyCreator), typeof(ConnectionInfo) }) == null)
             {
                 throw new ArgumentException($"Unable to create service of type '{service.ServiceType}' implementing interface '{nameof(ISlaveService)}'.");
             }
@@ -152,7 +151,7 @@ namespace Configurator
                 true,
                 BindingFlags.CreateInstance, 
                 null, 
-                new object[] { new ConnectionInfo(service.IpAddress, service.Port), loader, logService },
+                new object[] { creator, new ConnectionInfo(service.IpAddress, service.Port) },
                 CultureInfo.InvariantCulture, 
                 null);
 
@@ -162,28 +161,6 @@ namespace Configurator
             }
 
             return slave;
-        }
-
-        private T CreateInstance<T>(string instanceType)
-        {
-            if (instanceType == null)
-            {
-                throw new ArgumentNullException($"{nameof(instanceType)} must be not null.");
-            }
-
-            Type type = Type.GetType(instanceType);
-
-            if (type == null)
-            {
-                throw new NullReferenceException($"Type '{instanceType}' not found.");
-            }
-
-            if (type.GetInterface(typeof(T).Name) == null || type.GetConstructor(new Type[] { }) == null)
-            {
-                throw new ArgumentException($"Unable to create instance of type '{instanceType}' implementing interface '{typeof(T).Name}'.");
-            }
-
-            return (T)Activator.CreateInstance(type);
         }
     }
 }

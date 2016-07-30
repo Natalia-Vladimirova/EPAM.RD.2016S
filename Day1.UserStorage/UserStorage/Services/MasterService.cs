@@ -25,24 +25,17 @@ namespace UserStorage.Services
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
 
-        public MasterService(IIdGenerator idGenerator, IUserLoader loader, IEnumerable<IValidator> validators, IEnumerable<ConnectionInfo> slavesInfo, ILogService logger)
+        public MasterService(IDependencyCreator creator, IEnumerable<ConnectionInfo> slavesInfo)
         {
+            if (creator == null)
+            {
+                throw new ArgumentNullException($"{nameof(creator)} must be not null.");
+            }
+
+            logger = creator.CreateInstance<ILogService>();
             if (logger == null)
             {
-                throw new ArgumentNullException($"{nameof(logger)} must be not null.");
-            }
-
-            this.logger = logger;
-            if (idGenerator == null)
-            {
-                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(idGenerator)}.");
-                throw new ArgumentNullException($"{nameof(idGenerator)} must be not null.");
-            }
-
-            if (loader == null)
-            {
-                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(loader)}.");
-                throw new ArgumentNullException($"{nameof(loader)} must be not null.");
+                throw new InvalidOperationException($"Unable to create {nameof(logger)}.");
             }
 
             if (slavesInfo == null)
@@ -51,10 +44,23 @@ namespace UserStorage.Services
                 throw new ArgumentNullException($"{nameof(slavesInfo)} must be not null.");
             }
 
-            this.idGenerator = idGenerator;
-            this.loader = loader;
-            this.validators = validators ?? new List<IValidator>();
             this.slavesInfo = slavesInfo;
+
+            idGenerator = creator.CreateInstance<IIdGenerator>();
+            if (idGenerator == null)
+            {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(idGenerator)} is null.");
+                throw new InvalidOperationException($"Unable to create {nameof(idGenerator)}.");
+            }
+
+            loader = creator.CreateInstance<IUserLoader>();
+            if (loader == null)
+            {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(loader)} is null.");
+                throw new InvalidOperationException($"Unable to create {nameof(loader)}.");
+            }
+            
+            validators = creator.CreateListOfInstances<IValidator>() ?? new List<IValidator>();
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
 

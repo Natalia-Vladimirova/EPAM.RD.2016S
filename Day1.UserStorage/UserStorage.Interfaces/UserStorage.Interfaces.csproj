@@ -50,6 +50,7 @@
     <Compile Include="ServiceInfo\ServiceMessage.cs" />
     <Compile Include="ServiceInfo\ServiceOperation.cs" />
     <Compile Include="ServiceInfo\StorageState.cs" />
+    <Compile Include="Services\IDependencyCreator.cs" />
     <Compile Include="Services\ILogService.cs" />
     <Compile Include="Services\IMasterService.cs" />
     <Compile Include="Services\ISlaveService.cs" />

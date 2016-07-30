@@ -10,6 +10,9 @@ namespace Configurator.CustomSection
         [ConfigurationProperty("Loader")]
         public StartupServiceElement Loader => (StartupServiceElement)base["Loader"];
 
+        [ConfigurationProperty("Logger")]
+        public StartupServiceElement Logger => (StartupServiceElement)base["Logger"];
+
         [ConfigurationProperty("Validators")]
         public ValidatorsCollection Validators => (ValidatorsCollection)base["Validators"];
 

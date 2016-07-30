@@ -14,16 +14,23 @@ namespace UserStorage.Tests
     {
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void Slave_Ctor_NullConnectionInfo_ThrowAnException()
+        public void Slave_Ctor_NullCreator_ThrowAnException()
         {
-            new SlaveService(null, null, LogService.Instance);
+            new SlaveService(null, new ConnectionInfo("127.0.0.1", 131));
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Slave_Ctor_NullConnectionInfo_ThrowAnException()
+        {
+            new SlaveService(Creator, null);
+        }
+        
         [TestMethod]
         [ExpectedException(typeof(AccessViolationException))]
         public void Slave_Add_ThrowAnException()
         {
-            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader(), LogService.Instance);
+            var slave = new SlaveService(Creator, new ConnectionInfo("127.0.0.1", 131));
             slave.Add(null);
         }
 
@@ -31,7 +38,7 @@ namespace UserStorage.Tests
         [ExpectedException(typeof(AccessViolationException))]
         public void Slave_Delete_ThrowAnException()
         {
-            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader(), LogService.Instance);
+            var slave = new SlaveService(Creator, new ConnectionInfo("127.0.0.1", 131));
             slave.Delete(1);
         }
 
@@ -39,7 +46,7 @@ namespace UserStorage.Tests
         public void Slave_SearchForUser_OneCriteria_ReturnFirstUserId()
         {
             // act
-            var slave = new SlaveService(new ConnectionInfo("127.0.0.1", 131), new TestLoader(), LogService.Instance);
+            var slave = new SlaveService(Creator, new ConnectionInfo("127.0.0.1", 131));
             var user = slave.Users.First();
             var foundUsers = slave.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName });
 

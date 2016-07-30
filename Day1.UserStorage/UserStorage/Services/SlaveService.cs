@@ -20,24 +20,30 @@ namespace UserStorage.Services
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
 
-        public SlaveService(ConnectionInfo info, IUserLoader loader, ILogService logger)
+        public SlaveService(IDependencyCreator creator, ConnectionInfo info)
         {
-            if (logger == null)
+            if (creator == null)
             {
-                throw new ArgumentNullException($"{nameof(logger)} must be not null.");
+                throw new ArgumentNullException($"{nameof(creator)} must be not null.");
             }
 
-            this.logger = logger;
+            logger = creator.CreateInstance<ILogService>();
+            if (logger == null)
+            {
+                throw new InvalidOperationException($"Unable to create {nameof(logger)}.");
+            }
+            
             if (info == null)
             {
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(info)}.");
                 throw new ArgumentNullException($"{nameof(info)} must be not null.");
             }
 
+            var loader = creator.CreateInstance<IUserLoader>();
             if (loader == null)
             {
-                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(loader)}.");
-                throw new ArgumentNullException($"{nameof(loader)} must be not null.");
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(loader)} is null.");
+                throw new InvalidOperationException($"Unable to create {nameof(loader)}.");
             }
 
             readerWriterLock.EnterWriteLock();

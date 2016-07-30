@@ -15,25 +15,18 @@ namespace UserStorage.Tests
     {
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void Master_Ctor_NullIdGenerator_ThrowAnException()
+        public void Master_Ctor_NullCreator_ThrowAnException()
         {
-            new MasterService(null, null, null, null, LogService.Instance);
+            new MasterService(null, new ConnectionInfo[] { });
         }
         
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void Master_Ctor_NullLoader_ThrowAnException()
+        public void Master_Ctor_NullSlavesInfo_ThrowAnException()
         {
-            new MasterService(new FibonacciIdGenerator(), null, null, null, LogService.Instance);
+            new MasterService(Creator, null);
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void Master_Ctor_NullConnectionInfo_ThrowAnException()
-        {
-            new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, null, LogService.Instance);
-        }
-
+        
         [TestMethod]
         public void Master_Add_ValidUser_UserAddedToMaster()
         {
@@ -46,7 +39,7 @@ namespace UserStorage.Tests
             generator.GenerateNextId();
 
             // act
-            var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
+            var master = new MasterService(Creator, new ConnectionInfo[] { });
             master.Load();
             master.Add(new User { FirstName = testFirstName, LastName = testLastName, DateOfBirth = testDateTime, Gender = Gender.Female });
 
@@ -62,7 +55,7 @@ namespace UserStorage.Tests
         public void Master_Delete_ValidUser_UserRemovedFromMaster()
         {
             // act
-            var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
+            var master = new MasterService(Creator, new ConnectionInfo[] { });
             master.Load();
             var user = master.Users.First();
             master.Delete(user.PersonalId);
@@ -75,7 +68,7 @@ namespace UserStorage.Tests
         public void Master_SearchForUser_OneCriteria_ReturnFirstUserId()
         {
             // act
-            var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
+            var master = new MasterService(Creator, new ConnectionInfo[] { });
             master.Load();
             var user = master.Users.First();
             var foundUsers = master.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName });
@@ -88,7 +81,7 @@ namespace UserStorage.Tests
         public void Master_SearchForUser_TwoCriteria_ReturnEmptyCollection()
         {
             // act
-            var master = new MasterService(new FibonacciIdGenerator(), new TestLoader(), null, new ConnectionInfo[] { }, LogService.Instance);
+            var master = new MasterService(Creator, new ConnectionInfo[] { });
             master.Load();
             var user = master.Users.First();
             var foundUsers = master.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName, u => u.PersonalId == user.PersonalId + 1 });
