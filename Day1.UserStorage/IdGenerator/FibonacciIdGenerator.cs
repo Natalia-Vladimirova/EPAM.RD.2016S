@@ -5,7 +5,6 @@ using UserStorage.Interfaces.Generators;
 
 namespace IdGenerator
 {
-    [Serializable]
     public class FibonacciIdGenerator : IIdGenerator
     {
         private readonly IEnumerator<int> idGenerator;

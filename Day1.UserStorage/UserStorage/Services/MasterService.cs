@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Web.Script.Serialization;
+using UserStorage.Interfaces.Creators;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Generators;
 using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.Network;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 using UserStorage.Interfaces.Validators;
@@ -16,16 +15,16 @@ using UserStorage.Interfaces.Validators;
 namespace UserStorage.Services
 {
     [Serializable]
-    public class MasterService : MarshalByRefObject, IMasterService
+    public class MasterService : MarshalByRefObject, IServiceLoader, IUserService
     {
         private readonly IIdGenerator idGenerator;
         private readonly IUserLoader loader;
-        private readonly IEnumerable<IValidator> validators;
-        private readonly IEnumerable<ConnectionInfo> slavesInfo;
-        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
+        private readonly ISender sender;
+        private readonly IEnumerable<IValidator> validators;
+        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
-        public MasterService(IDependencyCreator creator, IEnumerable<ConnectionInfo> slavesInfo)
+        public MasterService(IDependencyCreator creator)
         {
             if (creator == null)
             {
@@ -37,14 +36,6 @@ namespace UserStorage.Services
             {
                 throw new InvalidOperationException($"Unable to create {nameof(logger)}.");
             }
-
-            if (slavesInfo == null)
-            {
-                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(slavesInfo)}.");
-                throw new ArgumentNullException($"{nameof(slavesInfo)} must be not null.");
-            }
-
-            this.slavesInfo = slavesInfo;
 
             idGenerator = creator.CreateInstance<IIdGenerator>();
             if (idGenerator == null)
@@ -59,7 +50,14 @@ namespace UserStorage.Services
                 logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(loader)} is null.");
                 throw new InvalidOperationException($"Unable to create {nameof(loader)}.");
             }
-            
+
+            sender = creator.CreateInstance<ISender>();
+            if (sender == null)
+            {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(sender)} is null.");
+                throw new InvalidOperationException($"Unable to create {nameof(sender)}.");
+            }
+
             validators = creator.CreateListOfInstances<IValidator>() ?? new List<IValidator>();
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
@@ -81,7 +79,7 @@ namespace UserStorage.Services
                 user.PersonalId = idGenerator.CurrentId;
                 Users.Add(user);
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser added (id: {idGenerator.CurrentId}).");
-                SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Addition));
+                sender.SendMessage(new ServiceMessage(user, ServiceOperation.Addition));
                 return user.PersonalId;
             }
             finally
@@ -100,7 +98,7 @@ namespace UserStorage.Services
                 {
                     Users.Remove(user);
                     logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser removed (id: {user.PersonalId}).");
-                    SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Removing));
+                    sender.SendMessage(new ServiceMessage(user, ServiceOperation.Removing));
                 }
             }
             finally
@@ -162,27 +160,6 @@ namespace UserStorage.Services
             finally
             {
                 readerWriterLock.ExitWriteLock();
-            }
-        }
-
-        private void SendMessageToSlaves<T>(T message)
-        {
-            var serializer = new JavaScriptSerializer();
-            string serializedMessage = serializer.Serialize(message);
-            byte[] data = Encoding.UTF8.GetBytes(serializedMessage);
-
-            foreach (var slave in slavesInfo)
-            {
-                using (TcpClient client = new TcpClient())
-                {
-                    client.Connect(slave.IPAddress, slave.Port);
-                    using (NetworkStream stream = client.GetStream())
-                    {
-                        stream.Write(data, 0, data.Length);
-                    }
-
-                    logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmessage was sent to {slave.IPAddress}:{slave.Port}.");
-                }
             }
         }
     }

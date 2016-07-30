@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UserStorage.Interfaces.Services;
+using UserStorage.Interfaces.Creators;
 
-namespace UserStorage.Services
+namespace Configurator.Creators
 {
     [Serializable]
     public class DependencyCreator : IDependencyCreator
     {
-        private readonly Dictionary<Type, string> typesSingle;
-        private readonly Dictionary<Type, List<string>> typesList;
+        private readonly Dictionary<Type, InstanceInfo> typesSingle;
+        private readonly Dictionary<Type, List<InstanceInfo>> typesList;
 
-        public DependencyCreator(Dictionary<Type, string> typesSingle, Dictionary<Type, List<string>> typesList)
+        public DependencyCreator(Dictionary<Type, InstanceInfo> typesSingle, Dictionary<Type, List<InstanceInfo>> typesList)
         {
             this.typesSingle = typesSingle;
             this.typesList = typesList;
@@ -24,8 +24,8 @@ namespace UserStorage.Services
                 throw new ArgumentNullException("Creator hasn't got types.");
             }
 
-            string type = typesSingle[typeof(T)];
-            return Create<T>(type);
+            var info = typesSingle[typeof(T)];
+            return Create<T>(info);
         }
 
         public IEnumerable<T> CreateListOfInstances<T>()
@@ -46,27 +46,27 @@ namespace UserStorage.Services
             instances.AddRange(types.Select(Create<T>));
             return instances;
         }
-
-        private T Create<T>(string instanceType)
+        
+        private T Create<T>(InstanceInfo instanceInfo)
         {
-            if (instanceType == null)
+            if (instanceInfo == null)
             {
-                throw new ArgumentNullException($"{nameof(instanceType)} must be not null.");
+                throw new ArgumentNullException($"{nameof(instanceInfo)} must be not null.");
             }
 
-            Type type = Type.GetType(instanceType);
+            Type type = Type.GetType(instanceInfo.TypeName);
 
             if (type == null)
             {
-                throw new NullReferenceException($"Type '{instanceType}' not found.");
+                throw new NullReferenceException($"Type '{instanceInfo.TypeName}' not found.");
             }
 
-            if (type.GetInterface(typeof(T).Name) == null || type.GetConstructor(new Type[] { }) == null)
+            if (type.GetInterface(typeof(T).Name) == null)
             {
-                throw new ArgumentException($"Unable to create instance of type '{instanceType}' implementing interface '{typeof(T).Name}'.");
+                throw new ArgumentException($"'{instanceInfo.TypeName}' doesn't implement interface '{typeof(T).Name}'.");
             }
 
-            return (T)Activator.CreateInstance(type);
+            return (T)Activator.CreateInstance(type, instanceInfo.Parameters);
         }
     }
 }

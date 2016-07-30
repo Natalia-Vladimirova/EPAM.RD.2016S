@@ -1,6 +1,6 @@
 ﻿namespace UserStorage.Interfaces.Services
 {
-    public interface IMasterService : IUserService
+    public interface IServiceLoader
     {
         void Load();
 

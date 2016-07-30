@@ -17,14 +17,7 @@ namespace UserStorage.Tests
         [ExpectedException(typeof(ArgumentNullException))]
         public void Master_Ctor_NullCreator_ThrowAnException()
         {
-            new MasterService(null, new ConnectionInfo[] { });
-        }
-        
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void Master_Ctor_NullSlavesInfo_ThrowAnException()
-        {
-            new MasterService(Creator, null);
+            new MasterService(null);
         }
         
         [TestMethod]
@@ -39,7 +32,7 @@ namespace UserStorage.Tests
             generator.GenerateNextId();
 
             // act
-            var master = new MasterService(Creator, new ConnectionInfo[] { });
+            var master = new MasterService(Creator);
             master.Load();
             master.Add(new User { FirstName = testFirstName, LastName = testLastName, DateOfBirth = testDateTime, Gender = Gender.Female });
 
@@ -55,7 +48,7 @@ namespace UserStorage.Tests
         public void Master_Delete_ValidUser_UserRemovedFromMaster()
         {
             // act
-            var master = new MasterService(Creator, new ConnectionInfo[] { });
+            var master = new MasterService(Creator);
             master.Load();
             var user = master.Users.First();
             master.Delete(user.PersonalId);
@@ -68,7 +61,7 @@ namespace UserStorage.Tests
         public void Master_SearchForUser_OneCriteria_ReturnFirstUserId()
         {
             // act
-            var master = new MasterService(Creator, new ConnectionInfo[] { });
+            var master = new MasterService(Creator);
             master.Load();
             var user = master.Users.First();
             var foundUsers = master.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName });
@@ -81,7 +74,7 @@ namespace UserStorage.Tests
         public void Master_SearchForUser_TwoCriteria_ReturnEmptyCollection()
         {
             // act
-            var master = new MasterService(Creator, new ConnectionInfo[] { });
+            var master = new MasterService(Creator);
             master.Load();
             var user = master.Users.First();
             var foundUsers = master.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName, u => u.PersonalId == user.PersonalId + 1 });

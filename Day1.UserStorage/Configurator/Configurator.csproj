@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Creators\DependencyCreator.cs" />
+    <Compile Include="Creators\InstanceInfo.cs" />
     <Compile Include="CustomSection\ServiceElement.cs" />
     <Compile Include="CustomSection\ServicesCollection.cs" />
     <Compile Include="CustomSection\StartupServiceElement.cs" />
@@ -53,10 +55,6 @@
     <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
       <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
       <Name>UserStorage.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\UserStorage\UserStorage.csproj">
-      <Project>{be31ea33-f714-4124-8f5a-da7de1f87c10}</Project>
-      <Name>UserStorage</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

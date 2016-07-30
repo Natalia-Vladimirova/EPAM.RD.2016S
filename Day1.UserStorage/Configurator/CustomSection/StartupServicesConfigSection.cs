@@ -13,6 +13,12 @@ namespace Configurator.CustomSection
         [ConfigurationProperty("Logger")]
         public StartupServiceElement Logger => (StartupServiceElement)base["Logger"];
 
+        [ConfigurationProperty("Sender")]
+        public StartupServiceElement Sender => (StartupServiceElement)base["Sender"];
+
+        [ConfigurationProperty("Receiver")]
+        public StartupServiceElement Receiver => (StartupServiceElement)base["Receiver"];
+
         [ConfigurationProperty("Validators")]
         public ValidatorsCollection Validators => (ValidatorsCollection)base["Validators"];
 

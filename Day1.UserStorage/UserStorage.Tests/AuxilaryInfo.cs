@@ -1,29 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Configurator.Creators;
 using IdGenerator;
+using UserStorage.Interfaces.Creators;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Generators;
 using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.Network;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 using UserStorage.Interfaces.Validators;
+using UserStorage.Network;
 using UserStorage.Services;
 
 namespace UserStorage.Tests
 {
     public static class AuxilaryInfo
     {
-        private static Dictionary<Type, string> typesSingle = new Dictionary<Type, string>
+        private static Dictionary<Type, InstanceInfo> typesSingle = new Dictionary<Type, InstanceInfo>
         {
-            { typeof(IIdGenerator), typeof(FibonacciIdGenerator).AssemblyQualifiedName },
-            { typeof(IUserLoader), typeof(TestLoader).AssemblyQualifiedName },
-            { typeof(ILogService), typeof(LogService).AssemblyQualifiedName },
+            { typeof(IIdGenerator), new InstanceInfo(typeof(FibonacciIdGenerator).AssemblyQualifiedName) },
+            { typeof(IUserLoader), new InstanceInfo(typeof(TestLoader).AssemblyQualifiedName) },
+            { typeof(ILogService), new InstanceInfo(typeof(LogService).AssemblyQualifiedName) },
+            { typeof(ISender), new InstanceInfo(typeof(Sender).AssemblyQualifiedName, new[] { new ConnectionInfo[] { } }) },
+            { typeof(IReceiver), new InstanceInfo(typeof(Receiver).AssemblyQualifiedName, new[] { new ConnectionInfo("127.0.0.1", 131) }) },
         };
 
         public static IDependencyCreator Creator => new DependencyCreator(
             typesSingle,
-            new Dictionary<Type, List<string>>
+            new Dictionary<Type, List<InstanceInfo>>
             {
                 { typeof(IValidator), null }
             });

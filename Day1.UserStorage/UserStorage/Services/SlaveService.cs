@@ -2,25 +2,24 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Web.Script.Serialization;
+using UserStorage.Interfaces.Creators;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.Network;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 
 namespace UserStorage.Services
 {
     [Serializable]
-    public class SlaveService : MarshalByRefObject, ISlaveService
+    public class SlaveService : MarshalByRefObject, IUserService, IListener
     {
-        private readonly TcpListener server;
-        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
+        private readonly IReceiver receiver;
+        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
-        public SlaveService(IDependencyCreator creator, ConnectionInfo info)
+        public SlaveService(IDependencyCreator creator)
         {
             if (creator == null)
             {
@@ -33,12 +32,6 @@ namespace UserStorage.Services
                 throw new InvalidOperationException($"Unable to create {nameof(logger)}.");
             }
             
-            if (info == null)
-            {
-                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tnull argument {nameof(info)}.");
-                throw new ArgumentNullException($"{nameof(info)} must be not null.");
-            }
-
             var loader = creator.CreateInstance<IUserLoader>();
             if (loader == null)
             {
@@ -46,12 +39,19 @@ namespace UserStorage.Services
                 throw new InvalidOperationException($"Unable to create {nameof(loader)}.");
             }
 
+            receiver = creator.CreateInstance<IReceiver>();
+            if (receiver == null)
+            {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(receiver)} is null.");
+                throw new InvalidOperationException($"Unable to create {nameof(receiver)}.");
+            }
+
+            receiver.Updating += UpdateOnModifying;
+
             readerWriterLock.EnterWriteLock();
             try
             {
                 Users = loader.Load().Users ?? new List<User>();
-                server = new TcpListener(info.IPAddress, info.Port);
-                server.Start();
             }
             finally
             {
@@ -65,14 +65,14 @@ namespace UserStorage.Services
 
         public int Add(User user)
         {
-            server.Stop();
+            receiver.StopReceiver();
             logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\taddition attempt; access denied.");
             throw new AccessViolationException("Slave cannot write to storage.");
         }
 
         public void Delete(int personalId)
         {
-            server.Stop();
+            receiver.StopReceiver();
             logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tremoving attempt; access denied.");
             throw new AccessViolationException("Slave cannot delete from storage.");
         }
@@ -98,63 +98,31 @@ namespace UserStorage.Services
             }
         }
         
-        public async void ListenForUpdates()
+        public void ListenForUpdates()
         {
-            var serializer = new JavaScriptSerializer();
-            try
-            {
-                while (true)
-                {
-                    using (TcpClient client = await server.AcceptTcpClientAsync())
-                    using (NetworkStream stream = client.GetStream())
-                    {
-                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers update received.");
-
-                        string serializedMessage = string.Empty;
-                        byte[] data = new byte[1024];
-
-                        while (stream.DataAvailable)
-                        {
-                            int i = await stream.ReadAsync(data, 0, data.Length);
-                            serializedMessage += Encoding.UTF8.GetString(data, 0, i);
-                        }
-
-                        readerWriterLock.EnterWriteLock();
-                        try
-                        {
-                            ServiceMessage message = serializer.Deserialize<ServiceMessage>(serializedMessage);
-                            UpdateOnModifying(message);
-                        }
-                        catch
-                        {
-                            logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tunable to deserialize request.");
-                            throw new InvalidOperationException("Unable to deserialize request.");
-                        }
-                        finally
-                        {
-                            readerWriterLock.ExitWriteLock();
-                        }
-                    }
-                }
-            }
-            finally 
-            {
-                server.Stop();
-            }
+            receiver.StartReceivingMessages();
         }
 
-        private void UpdateOnModifying(ServiceMessage message)
+        private void UpdateOnModifying(object sender, UserEventArgs eventArgs)
         {
-            switch (message.Operation)
+            readerWriterLock.EnterWriteLock();
+            try
             {
-                case ServiceOperation.Addition:
-                    Users.Add(message.User);
-                    logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user added.");
-                    break;
-                case ServiceOperation.Removing:
-                    Users.Remove(message.User);
-                    logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user removed.");
-                    break;
+                switch (eventArgs.Operation)
+                {
+                    case ServiceOperation.Addition:
+                        Users.Add(eventArgs.User);
+                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user added.");
+                        break;
+                    case ServiceOperation.Removing:
+                        Users.Remove(eventArgs.User);
+                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user removed.");
+                        break;
+                }
+            }
+            finally
+            {
+                readerWriterLock.ExitWriteLock();
             }
         }
     }

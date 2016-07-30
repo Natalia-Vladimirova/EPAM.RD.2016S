@@ -9,7 +9,6 @@ using UserStorage.Interfaces.ServiceInfo;
 
 namespace UserStorage.Loaders
 {
-    [Serializable]
     public class UserXmlLoader : IUserLoader
     {
         public StorageState Load()

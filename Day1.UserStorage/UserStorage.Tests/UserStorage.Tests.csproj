@@ -57,6 +57,10 @@
     <Compile Include="SlaveServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Configurator\Configurator.csproj">
+      <Project>{f2ff887f-8f3a-4278-b7fe-9ff5e8181d08}</Project>
+      <Name>Configurator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IdGenerator\IdGenerator.csproj">
       <Project>{379b70a9-093d-4a36-9b43-fda9f90c4478}</Project>
       <Name>IdGenerator</Name>

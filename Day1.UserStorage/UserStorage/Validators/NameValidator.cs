@@ -4,7 +4,6 @@ using UserStorage.Interfaces.Validators;
 
 namespace UserStorage.Validators
 {
-    [Serializable]
     public class NameValidator : IValidator
     {
         public bool IsValid(User user)

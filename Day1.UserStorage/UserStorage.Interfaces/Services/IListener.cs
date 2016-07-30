@@ -1,6 +1,6 @@
 ﻿namespace UserStorage.Interfaces.Services
 {
-    public interface ISlaveService : IUserService
+    public interface IListener
     {
         void ListenForUpdates();
     }
