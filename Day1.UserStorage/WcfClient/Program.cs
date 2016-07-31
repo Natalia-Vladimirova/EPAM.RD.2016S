@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using WcfClient.MasterServiceReference;
 
 namespace WcfClient
@@ -9,7 +8,11 @@ namespace WcfClient
         private static void Main(string[] args)
         {
             WcfUserServiceClient client = new WcfUserServiceClient("BasicHttpBinding_IWcfUserService");
-            int id = client.Search(new Func<User, bool>[] { u => u.PersonalId == 1 }).FirstOrDefault();
+            int id = client.Add(new User { FirstName = "Test", LastName = "LTest" });
+            client.Delete(id);
+
+            Console.WriteLine("Press <Enter> to exit.");
+            Console.ReadLine();
         }
     }
 }

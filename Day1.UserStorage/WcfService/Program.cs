@@ -17,7 +17,7 @@ namespace WcfService
             configurator.Start();
 
             Console.WriteLine("Press <Enter> to stop the services.");
-            Console.ReadKey();
+            Console.ReadLine();
 
             configurator.End();
         }
