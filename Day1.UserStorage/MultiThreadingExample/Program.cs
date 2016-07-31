@@ -2,44 +2,70 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Configurator;
+using Configurator.Creators;
+using IdGenerator;
+using UserStorage.Interfaces.Creators;
 using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.Generators;
+using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.Network;
+using UserStorage.Interfaces.ServiceInfo;
+using UserStorage.Interfaces.Services;
+using UserStorage.Interfaces.Validators;
+using UserStorage.Loaders;
+using UserStorage.Network;
+using UserStorage.Services;
 
 namespace MultiThreadingExample
 {
     public class Program
     {
+        private static Dictionary<Type, InstanceInfo> typesSingle = new Dictionary<Type, InstanceInfo>
+        {
+            { typeof(IIdGenerator), new InstanceInfo(typeof(FibonacciIdGenerator).AssemblyQualifiedName) },
+            { typeof(IUserLoader), new InstanceInfo(typeof(UserXmlLoader).AssemblyQualifiedName) },
+            { typeof(ILogService), new InstanceInfo(typeof(LogService).AssemblyQualifiedName) },
+            { typeof(ISender), new InstanceInfo(typeof(Sender).AssemblyQualifiedName, new[] { new ConnectionInfo[] { } }) },
+        };
+
+        private static IDependencyCreator creator = new DependencyCreator(
+            typesSingle,
+            new Dictionary<Type, List<InstanceInfo>>
+            {
+                { typeof(IValidator), null }
+            });
+
         private static void Main(string[] args)
         {
             List<Thread> threads = new List<Thread>();
-            var configurator = new ServiceConfigurator();
-            configurator.Start();
-            
+            var masterService = new MasterService(creator);
+            masterService.Load();
+
             threads.Add(new Thread(() =>
             {
-                configurator.MasterService.Add(new User { FirstName = "Test", LastName = "qwerty" });
+                masterService.Add(new User { FirstName = "Test", LastName = "qwerty" });
             }));
 
             threads.Add(new Thread(() =>
             {
-                configurator.MasterService.Add(new User { FirstName = "Test2", LastName = "qwerty2" });
+                masterService.Add(new User { FirstName = "Test2", LastName = "qwerty2" });
             }));
 
             threads.Add(new Thread(() =>
             {
-                int firstId = configurator.MasterService.SearchForUser(new Func<User, bool>[] { u => true }).FirstOrDefault();
-                configurator.MasterService.Delete(firstId);
+                int firstId = masterService.Search(new Func<User, bool>[] { u => true }).FirstOrDefault();
+                masterService.Delete(firstId);
             }));
 
             threads.Add(new Thread(() =>
             {
-                int lastId = configurator.MasterService.SearchForUser(new Func<User, bool>[] { u => true }).LastOrDefault();
-                configurator.MasterService.Delete(lastId);
+                int lastId = masterService.Search(new Func<User, bool>[] { u => true }).LastOrDefault();
+                masterService.Delete(lastId);
             }));
 
             threads.Add(new Thread(() =>
             {
-                configurator.MasterService.SearchForUser(new Func<User, bool>[] { u => true });
+                masterService.Search(new Func<User, bool>[] { u => true });
             }));
 
             foreach (var thread in threads)

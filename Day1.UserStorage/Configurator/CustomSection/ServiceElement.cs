@@ -31,5 +31,12 @@ namespace Configurator.CustomSection
             get { return (int)base["port"]; }
             set { base["port"] = value; }
         }
+
+        [ConfigurationProperty("hostAddress", IsRequired = true)]
+        public string HostAddress
+        {
+            get { return (string)base["hostAddress"]; }
+            set { base["hostAddress"] = value; }
+        }
     }
 }

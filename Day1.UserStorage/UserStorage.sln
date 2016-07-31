@@ -19,6 +19,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStorage.Interfaces", "U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiThreadingExample", "MultiThreadingExample\MultiThreadingExample.csproj", "{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfService", "WcfService\WcfService.csproj", "{C3150D74-3A02-48C9-B0CA-A5F6E2240FDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfServiceLibrary", "WcfServiceLibrary\WcfServiceLibrary.csproj", "{659F2F0E-3BB5-4149-AAE0-7D52C6B67A5D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfClient", "WcfClient\WcfClient.csproj", "{3F47EC14-2564-4264-8DDA-6E525039697C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +63,18 @@ Global
 		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E5F19B4-7B3F-4774-8684-C75F8F5DC4BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3150D74-3A02-48C9-B0CA-A5F6E2240FDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3150D74-3A02-48C9-B0CA-A5F6E2240FDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3150D74-3A02-48C9-B0CA-A5F6E2240FDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3150D74-3A02-48C9-B0CA-A5F6E2240FDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{659F2F0E-3BB5-4149-AAE0-7D52C6B67A5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{659F2F0E-3BB5-4149-AAE0-7D52C6B67A5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{659F2F0E-3BB5-4149-AAE0-7D52C6B67A5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{659F2F0E-3BB5-4149-AAE0-7D52C6B67A5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F47EC14-2564-4264-8DDA-6E525039697C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F47EC14-2564-4264-8DDA-6E525039697C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F47EC14-2564-4264-8DDA-6E525039697C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F47EC14-2564-4264-8DDA-6E525039697C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

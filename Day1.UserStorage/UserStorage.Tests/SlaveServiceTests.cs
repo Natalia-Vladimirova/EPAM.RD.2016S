@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UserStorage.Interfaces.Entities;
-using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Services;
 using static UserStorage.Tests.AuxilaryInfo;
 
@@ -40,8 +39,9 @@ namespace UserStorage.Tests
         {
             // act
             var slave = new SlaveService(Creator);
-            var user = slave.Users.First();
-            var foundUsers = slave.SearchForUser(new Func<User, bool>[] { u => u.LastName == user.LastName });
+            var user = slave.GetAll().First();
+            var foundUsers = slave.Search(new Func<User, bool>[] { u => u.LastName == user.LastName });
+            slave.StopListen();
 
             // assert
             CollectionAssert.AreEqual(new List<int> { user.PersonalId }, foundUsers.ToList());

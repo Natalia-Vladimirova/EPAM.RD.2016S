@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38537E77-6D9A-4837-A01D-A78155CE44FE}</ProjectGuid>
+    <ProjectGuid>{659F2F0E-3BB5-4149-AAE0-7D52C6B67A5D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UserStorage.Interfaces</RootNamespace>
-    <AssemblyName>UserStorage.Interfaces</AssemblyName>
+    <RootNamespace>WcfServiceLibrary</RootNamespace>
+    <AssemblyName>WcfServiceLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -42,33 +42,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\Gender.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Entities\Visa.cs" />
-    <Compile Include="Generators\IIdGenerator.cs" />
-    <Compile Include="Loaders\IUserLoader.cs" />
-    <Compile Include="Mappers\UserMappers.cs" />
-    <Compile Include="Mappers\VisaMappers.cs" />
-    <Compile Include="Network\IReceiver.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Network\ISender.cs" />
+    <Compile Include="IWcfUserService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceInfo\ConnectionInfo.cs" />
-    <Compile Include="ServiceInfo\ServiceMessage.cs" />
-    <Compile Include="ServiceInfo\ServiceOperation.cs" />
-    <Compile Include="ServiceInfo\StorageState.cs" />
-    <Compile Include="Creators\IDependencyCreator.cs" />
-    <Compile Include="ServiceInfo\UserEventArgs.cs" />
-    <Compile Include="Services\ILogService.cs" />
-    <Compile Include="Services\IServiceLoader.cs" />
-    <Compile Include="Services\IListener.cs" />
-    <Compile Include="Services\IUserService.cs" />
-    <Compile Include="Validators\IValidator.cs" />
-    <Compile Include="XmlEntities\XmlUser.cs" />
-    <Compile Include="XmlEntities\XmlVisa.cs" />
+    <Compile Include="WcfHost.cs" />
+    <Compile Include="WcfUserService.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
+      <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
+      <Name>UserStorage.Interfaces</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

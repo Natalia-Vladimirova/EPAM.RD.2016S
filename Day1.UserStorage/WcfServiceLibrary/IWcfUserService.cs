@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ServiceModel;
 using UserStorage.Interfaces.Entities;
 
-namespace UserStorage.Interfaces.Services
+namespace WcfServiceLibrary
 {
-    public interface IUserService
+    [ServiceContract]
+    public interface IWcfUserService
     {
+        [OperationContract]
         int Add(User user);
 
+        [OperationContract]
         void Delete(int personalId);
 
+        [OperationContract]
         IList<int> Search(Func<User, bool>[] criteria);
-
-        IList<User> GetAll();
     }
 }

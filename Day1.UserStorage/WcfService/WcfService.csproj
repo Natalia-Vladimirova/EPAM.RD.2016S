@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38537E77-6D9A-4837-A01D-A78155CE44FE}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{C3150D74-3A02-48C9-B0CA-A5F6E2240FDB}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UserStorage.Interfaces</RootNamespace>
-    <AssemblyName>UserStorage.Interfaces</AssemblyName>
+    <RootNamespace>WcfService</RootNamespace>
+    <AssemblyName>WcfService</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,7 +35,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -42,31 +44,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\Gender.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Entities\Visa.cs" />
-    <Compile Include="Generators\IIdGenerator.cs" />
-    <Compile Include="Loaders\IUserLoader.cs" />
-    <Compile Include="Mappers\UserMappers.cs" />
-    <Compile Include="Mappers\VisaMappers.cs" />
-    <Compile Include="Network\IReceiver.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Network\ISender.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceInfo\ConnectionInfo.cs" />
-    <Compile Include="ServiceInfo\ServiceMessage.cs" />
-    <Compile Include="ServiceInfo\ServiceOperation.cs" />
-    <Compile Include="ServiceInfo\StorageState.cs" />
-    <Compile Include="Creators\IDependencyCreator.cs" />
-    <Compile Include="ServiceInfo\UserEventArgs.cs" />
-    <Compile Include="Services\ILogService.cs" />
-    <Compile Include="Services\IServiceLoader.cs" />
-    <Compile Include="Services\IListener.cs" />
-    <Compile Include="Services\IUserService.cs" />
-    <Compile Include="Validators\IValidator.cs" />
-    <Compile Include="XmlEntities\XmlUser.cs" />
-    <Compile Include="XmlEntities\XmlVisa.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Configurator\Configurator.csproj">
+      <Project>{f2ff887f-8f3a-4278-b7fe-9ff5e8181d08}</Project>
+      <Name>Configurator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IdGenerator\IdGenerator.csproj">
+      <Project>{379b70a9-093d-4a36-9b43-fda9f90c4478}</Project>
+      <Name>IdGenerator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UserStorage.Interfaces\UserStorage.Interfaces.csproj">
+      <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
+      <Name>UserStorage.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UserStorage\UserStorage.csproj">
+      <Project>{be31ea33-f714-4124-8f5a-da7de1f87c10}</Project>
+      <Name>UserStorage</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

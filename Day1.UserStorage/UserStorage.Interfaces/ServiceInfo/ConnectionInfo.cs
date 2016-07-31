@@ -6,15 +6,15 @@ namespace UserStorage.Interfaces.ServiceInfo
     [Serializable]
     public class ConnectionInfo
     {
-        public ConnectionInfo(string ipAddress, int port)
+        public ConnectionInfo(string address, int port)
         {
-            IPAddress address;
-            if (!IPAddress.TryParse(ipAddress, out address))
+            IPAddress parsedAddress;
+            if (!IPAddress.TryParse(address, out parsedAddress))
             {
-                throw new ArgumentException($"{nameof(ipAddress)} is invalid.");
+                throw new ArgumentException($"{nameof(address)} is invalid.");
             }
 
-            IPAddress = address;
+            IPAddress = parsedAddress;
             Port = port;
         }
 

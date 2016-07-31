@@ -3,5 +3,7 @@
     public interface IListener
     {
         void ListenForUpdates();
+
+        void StopListen();
     }
 }

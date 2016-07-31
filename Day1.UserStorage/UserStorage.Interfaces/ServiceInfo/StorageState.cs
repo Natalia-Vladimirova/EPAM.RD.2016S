@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.Mappers;
+using UserStorage.Interfaces.XmlEntities;
 
 namespace UserStorage.Interfaces.ServiceInfo
 {
@@ -21,16 +24,16 @@ namespace UserStorage.Interfaces.ServiceInfo
         {
             reader.ReadStartElement(nameof(StorageState));
             LastId = reader.ReadElementContentAsInt();
-            var serializer = new XmlSerializer(typeof(List<User>));
-            Users = (List<User>)serializer.Deserialize(reader);
+            var serializer = new XmlSerializer(typeof(List<XmlUser>));
+            Users = ((List<XmlUser>)serializer.Deserialize(reader)).Select(u => u.ToUser()).ToList();
             reader.ReadEndElement();
         }
 
         public void WriteXml(XmlWriter writer)
         {
             writer.WriteElementString(nameof(LastId), LastId.ToString());
-            var serializer = new XmlSerializer(typeof(List<User>));
-            serializer.Serialize(writer, Users);
+            var serializer = new XmlSerializer(typeof(List<XmlUser>));
+            serializer.Serialize(writer, Users.Select(u => u.ToXmlUser()).ToList());
         }
     }
 }

@@ -12,14 +12,14 @@ using UserStorage.Interfaces.Network;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
 using UserStorage.Interfaces.Validators;
+using WcfServiceLibrary;
 
 namespace Configurator
 {
     public class ServiceConfigurator
     {
-        public IUserService MasterService { get; private set; }
-
-        public List<IUserService> SlaveServices { get; private set; }
+        private WcfHost masterHost;
+        private List<WcfHost> slaveHosts;
 
         public void Start()
         {
@@ -45,29 +45,33 @@ namespace Configurator
                 throw new ConfigurationErrorsException("Count of masters must be one.");
             }
 
-            SlaveServices = new List<IUserService>();
-
             string masterType = string.Empty;
+            string masterHostAddress = string.Empty;
             var slavesInfo = new List<ConnectionInfo>();
+            slaveHosts = new List<WcfHost>();
 
             for (int i = 0; i < servicesSection.Services.Count; i++)
             {
                 if (servicesSection.Services[i].IsMaster)
                 {
                     masterType = servicesSection.Services[i].ServiceType;
+                    masterHostAddress = servicesSection.Services[i].HostAddress;
                 }
                 else
                 {
                     var connectionInfo = new ConnectionInfo(servicesSection.Services[i].IpAddress, servicesSection.Services[i].Port);
+                    slavesInfo.Add(connectionInfo);
+
                     var slaveDependencies = new Dictionary<Type, InstanceInfo>();
                     slaveDependencies.Add(typeof(IUserLoader), new InstanceInfo(servicesSection.Loader.Type));
                     slaveDependencies.Add(typeof(ILogService), new InstanceInfo(servicesSection.Logger.Type));
                     slaveDependencies.Add(typeof(IReceiver), new InstanceInfo(servicesSection.Receiver.Type, connectionInfo));
 
-                    IUserService slaveService = CreateService($"Slave{i}", servicesSection.Services[i].ServiceType, new DependencyCreator(slaveDependencies, null));
-                    SlaveServices.Add(slaveService);
-                    slavesInfo.Add(connectionInfo);
-                    (slaveService as IListener)?.ListenForUpdates();
+                    var slaveHost = CreateServiceHost(
+                        servicesSection.Services[i].ServiceType, 
+                        new DependencyCreator(slaveDependencies, null), 
+                        servicesSection.Services[i].HostAddress);
+                    slaveHosts.Add(slaveHost);
                 }
             }
 
@@ -84,16 +88,22 @@ namespace Configurator
                 validators.Add(new InstanceInfo(servicesSection.Validators[j].Type));
             }
 
-            MasterService = CreateService("Master", masterType, new DependencyCreator(masterDependencies, new Dictionary<Type, List<InstanceInfo>> { { typeof(IValidator), validators } }));
-            (MasterService as IServiceLoader)?.Load();
+            masterHost = CreateServiceHost(
+                masterType, 
+                new DependencyCreator(masterDependencies, new Dictionary<Type, List<InstanceInfo>> { { typeof(IValidator), validators } }), 
+                masterHostAddress);
         }
 
         public void End()
         {
-            (MasterService as IServiceLoader)?.Save();
+            masterHost.Close();
+            foreach (var slaveHost in slaveHosts)
+            {
+                slaveHost.Close();
+            }
         }
-
-        private IUserService CreateService(string serviceName, string serviceType, IDependencyCreator creator)
+        
+        private WcfHost CreateServiceHost(string serviceType, IDependencyCreator creator, string hostAddress)
         {
             if (serviceType == null)
             {
@@ -113,8 +123,13 @@ namespace Configurator
                 throw new ArgumentException($"Unable to create service of type '{serviceType}' implementing interface '{nameof(IUserService)}'.");
             }
 
-            AppDomain appDomain = AppDomain.CreateDomain(serviceName);
+            string domainName = GetDomainNameFromHostAddress(hostAddress);
+            AppDomain appDomain = AppDomain.CreateDomain(domainName);
 
+            var host = (WcfHost)appDomain.CreateInstanceAndUnwrap(
+                typeof(WcfHost).Assembly.FullName, 
+                typeof(WcfHost).FullName);
+            
             var service = (IUserService)appDomain.CreateInstanceAndUnwrap(
                 type.Assembly.FullName,
                 type.FullName,
@@ -124,13 +139,19 @@ namespace Configurator
                 new object[] { creator },
                 CultureInfo.InvariantCulture,
                 null);
-
+            
             if (service == null)
             {
-                throw new ConfigurationErrorsException($"Unable to load domain of service '{serviceName}'.");
+                throw new ConfigurationErrorsException($"Unable to load domain of service '{domainName}'.");
             }
 
-            return service;
+            host.Start(hostAddress, service);
+            return host;
+        }
+
+        private string GetDomainNameFromHostAddress(string hostAddress)
+        {
+            return hostAddress.Substring(hostAddress.LastIndexOf('/') + 1);
         }
     }
 }

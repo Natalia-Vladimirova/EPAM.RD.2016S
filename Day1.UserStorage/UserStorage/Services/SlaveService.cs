@@ -15,9 +15,10 @@ namespace UserStorage.Services
     [Serializable]
     public class SlaveService : MarshalByRefObject, IUserService, IListener
     {
+        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly ILogService logger;
         private readonly IReceiver receiver;
-        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
+        private readonly IList<User> users;
 
         public SlaveService(IDependencyCreator creator)
         {
@@ -51,7 +52,7 @@ namespace UserStorage.Services
             readerWriterLock.EnterWriteLock();
             try
             {
-                Users = loader.Load().Users ?? new List<User>();
+                users = loader.Load().Users ?? new List<User>();
             }
             finally
             {
@@ -60,8 +61,6 @@ namespace UserStorage.Services
 
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tslave service created.");
         }
-
-        public IList<User> Users { get; }
 
         public int Add(User user)
         {
@@ -77,12 +76,12 @@ namespace UserStorage.Services
             throw new AccessViolationException("Slave cannot delete from storage.");
         }
 
-        public IList<int> SearchForUser(Func<User, bool>[] criteria)
+        public IList<int> Search(Func<User, bool>[] criteria)
         {
             readerWriterLock.EnterReadLock();
             try
             {
-                IEnumerable<User> foundUsers = Users;
+                IEnumerable<User> foundUsers = users;
                 foreach (var cr in criteria)
                 {
                     foundUsers = foundUsers.Where(cr);
@@ -97,10 +96,23 @@ namespace UserStorage.Services
                 readerWriterLock.ExitReadLock();
             }
         }
-        
+
+        public IList<User> GetAll()
+        {
+            logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tgetting all users.");
+            return users;
+        }
+
         public void ListenForUpdates()
         {
+            logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tstart receiving messages.");
             receiver.StartReceivingMessages();
+        }
+
+        public void StopListen()
+        {
+            logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tstop receiving messages.");
+            receiver.StopReceiver();
         }
 
         private void UpdateOnModifying(object sender, UserEventArgs eventArgs)
@@ -111,11 +123,11 @@ namespace UserStorage.Services
                 switch (eventArgs.Operation)
                 {
                     case ServiceOperation.Addition:
-                        Users.Add(eventArgs.User);
+                        users.Add(eventArgs.User);
                         logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user added.");
                         break;
                     case ServiceOperation.Removing:
-                        Users.Remove(eventArgs.User);
+                        users.Remove(eventArgs.User);
                         logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user removed.");
                         break;
                 }

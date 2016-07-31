@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38537E77-6D9A-4837-A01D-A78155CE44FE}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{3F47EC14-2564-4264-8DDA-6E525039697C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UserStorage.Interfaces</RootNamespace>
-    <AssemblyName>UserStorage.Interfaces</AssemblyName>
+    <RootNamespace>WcfClient</RootNamespace>
+    <AssemblyName>WcfClient</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -42,33 +45,54 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\Gender.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Entities\Visa.cs" />
-    <Compile Include="Generators\IIdGenerator.cs" />
-    <Compile Include="Loaders\IUserLoader.cs" />
-    <Compile Include="Mappers\UserMappers.cs" />
-    <Compile Include="Mappers\VisaMappers.cs" />
-    <Compile Include="Network\IReceiver.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Network\ISender.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceInfo\ConnectionInfo.cs" />
-    <Compile Include="ServiceInfo\ServiceMessage.cs" />
-    <Compile Include="ServiceInfo\ServiceOperation.cs" />
-    <Compile Include="ServiceInfo\StorageState.cs" />
-    <Compile Include="Creators\IDependencyCreator.cs" />
-    <Compile Include="ServiceInfo\UserEventArgs.cs" />
-    <Compile Include="Services\ILogService.cs" />
-    <Compile Include="Services\IServiceLoader.cs" />
-    <Compile Include="Services\IListener.cs" />
-    <Compile Include="Services\IUserService.cs" />
-    <Compile Include="Validators\IValidator.cs" />
-    <Compile Include="XmlEntities\XmlUser.cs" />
-    <Compile Include="XmlEntities\XmlVisa.cs" />
+    <Compile Include="Service References\MasterServiceReference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Service References\MasterServiceReference\master.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\MasterServiceReference\master1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\MasterServiceReference\master2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\MasterServiceReference\master3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\MasterServiceReference\master4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\MasterServiceReference\WcfUserService.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\MasterServiceReference\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\MasterServiceReference\master.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\MasterServiceReference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\MasterServiceReference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\MasterServiceReference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

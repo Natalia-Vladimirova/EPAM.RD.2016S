@@ -1,24 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
+using System.Runtime.Serialization;
 
 namespace UserStorage.Interfaces.Entities
 {
-    [Serializable]
-    public class User : IXmlSerializable
+    [DataContract]
+    public class User
     {
+        [DataMember]
         public int PersonalId { get; set; }
 
+        [DataMember]
         public string FirstName { get; set; }
 
+        [DataMember]
         public string LastName { get; set; }
 
+        [DataMember]
         public DateTime DateOfBirth { get; set; }
 
+        [DataMember]
         public Gender Gender { get; set; }
 
+        [DataMember]
         public List<Visa> Visas { get; set; }
 
         public override bool Equals(object obj)
@@ -56,35 +60,6 @@ namespace UserStorage.Interfaces.Entities
             }
 
             return hashCode ^ DateOfBirth.GetHashCode() ^ Gender.GetHashCode();
-        }
-
-        public XmlSchema GetSchema()
-        {
-            return null;
-        }
-
-        public void ReadXml(XmlReader reader)
-        {
-            reader.ReadStartElement(nameof(User));
-            PersonalId = reader.ReadElementContentAsInt();
-            FirstName = reader.ReadElementContentAsString();
-            LastName = reader.ReadElementContentAsString();
-            DateOfBirth = reader.ReadElementContentAsDateTime();
-            Gender = (Gender)reader.ReadElementContentAsInt();
-            var serializer = new XmlSerializer(typeof(List<Visa>));
-            Visas = (List<Visa>)serializer.Deserialize(reader);
-            reader.ReadEndElement();
-        }
-
-        public void WriteXml(XmlWriter writer)
-        {
-            writer.WriteElementString(nameof(PersonalId), PersonalId.ToString());
-            writer.WriteElementString(nameof(FirstName), FirstName);
-            writer.WriteElementString(nameof(LastName), LastName);
-            writer.WriteElementString(nameof(DateOfBirth), DateOfBirth.ToString("yyyy-MM-dd"));
-            writer.WriteElementString(nameof(Gender), ((int)Gender).ToString());
-            var serializer = new XmlSerializer(typeof(List<Visa>));
-            serializer.Serialize(writer, Visas);
         }
     }
 }

@@ -2,11 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Configurator;
+using Configurator.Creators;
+using IdGenerator;
+using UserStorage.Interfaces.Creators;
 using UserStorage.Interfaces.Entities;
+using UserStorage.Interfaces.Generators;
+using UserStorage.Interfaces.Loaders;
+using UserStorage.Interfaces.Network;
 using UserStorage.Interfaces.ServiceInfo;
 using UserStorage.Interfaces.Services;
+using UserStorage.Interfaces.Validators;
 using UserStorage.Loaders;
+using UserStorage.Network;
+using UserStorage.Services;
 
 namespace ConsoleUI
 {
@@ -14,16 +22,34 @@ namespace ConsoleUI
     {
         private static volatile bool endWork;
 
+        private static Dictionary<Type, InstanceInfo> typesSingle = new Dictionary<Type, InstanceInfo>
+        {
+            { typeof(IIdGenerator), new InstanceInfo(typeof(FibonacciIdGenerator).AssemblyQualifiedName) },
+            { typeof(IUserLoader), new InstanceInfo(typeof(UserXmlLoader).AssemblyQualifiedName) },
+            { typeof(ILogService), new InstanceInfo(typeof(LogService).AssemblyQualifiedName) },
+            { typeof(ISender), new InstanceInfo(typeof(Sender).AssemblyQualifiedName, new[] { new[] { new ConnectionInfo("127.0.0.1", 131) } }) },
+            { typeof(IReceiver), new InstanceInfo(typeof(Receiver).AssemblyQualifiedName, new[] { new ConnectionInfo("127.0.0.1", 131) }) },
+        };
+
+        public static IDependencyCreator Creator => new DependencyCreator(
+            typesSingle,
+            new Dictionary<Type, List<InstanceInfo>>
+            {
+                { typeof(IValidator), null }
+            });
+
         private static void Main(string[] args)
         {
             SaveExample();
             
             List<Thread> threads = new List<Thread>();
-            var configurator = new ServiceConfigurator();
-            configurator.Start();
+            var masterService = new MasterService(Creator);
+            masterService.Load();
+            var slaveService = new SlaveService(Creator);
+            slaveService.ListenForUpdates();
 
-            threads.Add(new Thread(() => WorkMaster(configurator.MasterService)));
-            threads.AddRange(configurator.SlaveServices.Select(slave => new Thread(() => WorkSlave(slave))));
+            threads.Add(new Thread(() => WorkMaster(masterService)));
+            threads.Add(new Thread(() => WorkSlave(slaveService)));
             
             foreach (Thread thread in threads)
             {
@@ -39,8 +65,6 @@ namespace ConsoleUI
                 thread.Join();
             }
 
-            configurator.End();
-
             Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
         }
@@ -50,7 +74,7 @@ namespace ConsoleUI
             while (!endWork)
             {
                 master.Add(new User { FirstName = "Test", LastName = "LTest" });
-                int firstId = master.SearchForUser(new Func<User, bool>[] { u => true }).FirstOrDefault();
+                int firstId = master.Search(new Func<User, bool>[] { u => true }).FirstOrDefault();
                 master.Delete(firstId);
                 Thread.Sleep(1000);
             }
@@ -60,7 +84,7 @@ namespace ConsoleUI
         {
             while (!endWork)
             {
-                slave.SearchForUser(new Func<User, bool>[] { u => u.FirstName == "Test" });
+                slave.Search(new Func<User, bool>[] { u => u.FirstName == "Test" });
                 Thread.Sleep(1000);
             }
         }

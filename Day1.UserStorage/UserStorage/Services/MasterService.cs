@@ -17,12 +17,13 @@ namespace UserStorage.Services
     [Serializable]
     public class MasterService : MarshalByRefObject, IServiceLoader, IUserService
     {
+        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly IIdGenerator idGenerator;
         private readonly IUserLoader loader;
         private readonly ILogService logger;
         private readonly ISender sender;
         private readonly IEnumerable<IValidator> validators;
-        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
+        private IList<User> users;
 
         public MasterService(IDependencyCreator creator)
         {
@@ -62,8 +63,6 @@ namespace UserStorage.Services
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
 
-        public IList<User> Users { get; private set; }
-
         public int Add(User user)
         {
             if (validators.Any(validator => !validator?.IsValid(user) ?? false))
@@ -77,7 +76,7 @@ namespace UserStorage.Services
             {
                 idGenerator.GenerateNextId();
                 user.PersonalId = idGenerator.CurrentId;
-                Users.Add(user);
+                users.Add(user);
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser added (id: {idGenerator.CurrentId}).");
                 sender.SendMessage(new ServiceMessage(user, ServiceOperation.Addition));
                 return user.PersonalId;
@@ -93,10 +92,10 @@ namespace UserStorage.Services
             readerWriterLock.EnterWriteLock();
             try
             {
-                User user = Users.FirstOrDefault(u => u.PersonalId == personalId);
+                User user = users.FirstOrDefault(u => u.PersonalId == personalId);
                 if (user != null)
                 {
-                    Users.Remove(user);
+                    users.Remove(user);
                     logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tuser removed (id: {user.PersonalId}).");
                     sender.SendMessage(new ServiceMessage(user, ServiceOperation.Removing));
                 }
@@ -107,12 +106,12 @@ namespace UserStorage.Services
             }
         }
 
-        public IList<int> SearchForUser(Func<User, bool>[] criteria)
+        public IList<int> Search(Func<User, bool>[] criteria)
         {
             readerWriterLock.EnterReadLock();
             try
             {
-                IEnumerable<User> foundUsers = Users;
+                IEnumerable<User> foundUsers = users;
                 foreach (var cr in criteria)
                 {
                     foundUsers = foundUsers.Where(cr);
@@ -128,13 +127,19 @@ namespace UserStorage.Services
             }
         }
 
+        public IList<User> GetAll()
+        {
+            logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tgetting all users.");
+            return users;
+        }
+
         public void Load()
         {
             readerWriterLock.EnterWriteLock();
             try
             {
                 var storageState = loader.Load();
-                Users = storageState.Users ?? new List<User>();
+                users = storageState.Users ?? new List<User>();
                 idGenerator.SetInitialValue(storageState.LastId);
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tservice state loaded.");
             }
@@ -152,7 +157,7 @@ namespace UserStorage.Services
                 var storageState = new StorageState
                 {
                     LastId = idGenerator.CurrentId,
-                    Users = Users.ToList()
+                    Users = users.ToList()
                 };
                 loader.Save(storageState);
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tservice state saved.");

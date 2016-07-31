@@ -56,6 +56,10 @@
       <Project>{38537e77-6d9a-4837-a01d-a78155ce44fe}</Project>
       <Name>UserStorage.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WcfServiceLibrary\WcfServiceLibrary.csproj">
+      <Project>{659f2f0e-3bb5-4149-aae0-7d52c6b67a5d}</Project>
+      <Name>WcfServiceLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

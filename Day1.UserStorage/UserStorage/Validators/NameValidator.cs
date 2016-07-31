@@ -1,5 +1,4 @@
-﻿using System;
-using UserStorage.Interfaces.Entities;
+﻿using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Validators;
 
 namespace UserStorage.Validators
