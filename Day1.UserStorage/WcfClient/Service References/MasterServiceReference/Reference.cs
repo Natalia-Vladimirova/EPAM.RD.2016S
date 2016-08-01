@@ -38,7 +38,7 @@ namespace WcfClient.MasterServiceReference {
         private int PersonalIdField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private WcfClient.MasterServiceReference.Visa[] VisasField;
+        private System.Collections.Generic.List<WcfClient.MasterServiceReference.Visa> VisasField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -116,7 +116,7 @@ namespace WcfClient.MasterServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public WcfClient.MasterServiceReference.Visa[] Visas {
+        public System.Collections.Generic.List<WcfClient.MasterServiceReference.Visa> Visas {
             get {
                 return this.VisasField;
             }
@@ -242,10 +242,10 @@ namespace WcfClient.MasterServiceReference {
         System.Threading.Tasks.Task DeleteAsync(int personalId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWcfUserService/Search", ReplyAction="http://tempuri.org/IWcfUserService/SearchResponse")]
-        int[] Search(System.Func<WcfClient.MasterServiceReference.User, bool>[] criteria);
+        System.Collections.Generic.List<int> Search(WcfClient.MasterServiceReference.User criteria);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWcfUserService/Search", ReplyAction="http://tempuri.org/IWcfUserService/SearchResponse")]
-        System.Threading.Tasks.Task<int[]> SearchAsync(System.Func<WcfClient.MasterServiceReference.User, bool>[] criteria);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<int>> SearchAsync(WcfClient.MasterServiceReference.User criteria);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -291,11 +291,11 @@ namespace WcfClient.MasterServiceReference {
             return base.Channel.DeleteAsync(personalId);
         }
         
-        public int[] Search(System.Func<WcfClient.MasterServiceReference.User, bool>[] criteria) {
+        public System.Collections.Generic.List<int> Search(WcfClient.MasterServiceReference.User criteria) {
             return base.Channel.Search(criteria);
         }
         
-        public System.Threading.Tasks.Task<int[]> SearchAsync(System.Func<WcfClient.MasterServiceReference.User, bool>[] criteria) {
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<int>> SearchAsync(WcfClient.MasterServiceReference.User criteria) {
             return base.Channel.SearchAsync(criteria);
         }
     }

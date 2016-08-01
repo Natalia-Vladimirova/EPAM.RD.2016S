@@ -9,7 +9,9 @@
     <GenerateInternalTypes>false</GenerateInternalTypes>
     <GenerateMessageContracts>false</GenerateMessageContracts>
     <NamespaceMappings />
-    <CollectionMappings />
+    <CollectionMappings>
+      <CollectionMapping TypeName="System.Collections.Generic.List`1" Category="List" />
+    </CollectionMappings>
     <GenerateSerializableTypes>true</GenerateSerializableTypes>
     <Serializer>Auto</Serializer>
     <UseSerializerForFaults>true</UseSerializerForFaults>
@@ -26,7 +28,6 @@
     <MetadataFile FileName="master1.xsd" MetadataType="Schema" ID="e8233bd2-34d2-4831-9132-43a1faafb77f" SourceId="1" SourceUrl="http://localhost:8080/master?xsd=xsd3" />
     <MetadataFile FileName="master2.xsd" MetadataType="Schema" ID="03368325-0520-41d3-b0c6-968a00385093" SourceId="1" SourceUrl="http://localhost:8080/master?xsd=xsd0" />
     <MetadataFile FileName="master3.xsd" MetadataType="Schema" ID="4b54484a-54ad-4842-8f54-0deb4f1f1f59" SourceId="1" SourceUrl="http://localhost:8080/master?xsd=xsd1" />
-    <MetadataFile FileName="master4.xsd" MetadataType="Schema" ID="d6270e65-9548-4da4-9126-a7ba90d3d01e" SourceId="1" SourceUrl="http://localhost:8080/master?xsd=xsd4" />
     <MetadataFile FileName="WcfUserService.wsdl" MetadataType="Wsdl" ID="3bebbc94-cf29-46fd-af35-b67a9100f075" SourceId="1" SourceUrl="http://localhost:8080/master?wsdl" />
     <MetadataFile FileName="master.disco" MetadataType="Disco" ID="683e1175-a87b-4a4d-87d4-13b989b7243c" SourceId="1" SourceUrl="http://localhost:8080/master?disco" />
   </Metadata>

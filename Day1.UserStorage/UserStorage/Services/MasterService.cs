@@ -15,7 +15,7 @@ using UserStorage.Interfaces.Validators;
 namespace UserStorage.Services
 {
     [Serializable]
-    public class MasterService : MarshalByRefObject, IServiceLoader, IUserService
+    public class MasterService : MarshalByRefObject, IUserService, IServiceLoader
     {
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly IIdGenerator idGenerator;
@@ -106,18 +106,12 @@ namespace UserStorage.Services
             }
         }
 
-        public IList<int> Search(Func<User, bool>[] criteria)
+        public IList<int> Search(Func<User, bool> criteria)
         {
             readerWriterLock.EnterReadLock();
             try
             {
-                IEnumerable<User> foundUsers = users;
-                foreach (var cr in criteria)
-                {
-                    foundUsers = foundUsers.Where(cr);
-                }
-
-                var foundIds = foundUsers.Select(u => u.PersonalId).ToList();
+                var foundIds = users.Where(criteria).Select(u => u.PersonalId).ToList();
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundIds.Count} found).");
                 return foundIds;
             }

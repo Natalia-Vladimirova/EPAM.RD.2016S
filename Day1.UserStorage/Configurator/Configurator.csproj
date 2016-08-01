@@ -43,8 +43,11 @@
   <ItemGroup>
     <Compile Include="Creators\DependencyCreator.cs" />
     <Compile Include="Creators\InstanceInfo.cs" />
+    <Compile Include="CustomSection\IpElement.cs" />
+    <Compile Include="CustomSection\IpsCollection.cs" />
     <Compile Include="CustomSection\ServiceElement.cs" />
     <Compile Include="CustomSection\ServicesCollection.cs" />
+    <Compile Include="CustomSection\StartupIpConfigSection.cs" />
     <Compile Include="CustomSection\StartupServiceElement.cs" />
     <Compile Include="CustomSection\StartupServicesConfigSection.cs" />
     <Compile Include="CustomSection\ValidatorsCollection.cs" />

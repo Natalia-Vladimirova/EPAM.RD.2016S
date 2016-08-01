@@ -76,18 +76,12 @@ namespace UserStorage.Services
             throw new AccessViolationException("Slave cannot delete from storage.");
         }
 
-        public IList<int> Search(Func<User, bool>[] criteria)
+        public IList<int> Search(Func<User, bool> criteria)
         {
             readerWriterLock.EnterReadLock();
             try
             {
-                IEnumerable<User> foundUsers = users;
-                foreach (var cr in criteria)
-                {
-                    foundUsers = foundUsers.Where(cr);
-                }
-
-                var foundIds = foundUsers.Select(u => u.PersonalId).ToList();
+                var foundIds = users.Where(criteria).Select(u => u.PersonalId).ToList();
                 logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundIds.Count} found).");
                 return foundIds;
             }
@@ -124,11 +118,11 @@ namespace UserStorage.Services
                 {
                     case ServiceOperation.Addition:
                         users.Add(eventArgs.User);
-                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user added.");
+                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user added (id: {eventArgs.User.PersonalId}).");
                         break;
                     case ServiceOperation.Removing:
                         users.Remove(eventArgs.User);
-                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user removed.");
+                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user removed (id: {eventArgs.User.PersonalId}).");
                         break;
                 }
             }

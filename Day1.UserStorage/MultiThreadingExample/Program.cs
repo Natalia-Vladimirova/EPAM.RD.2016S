@@ -53,19 +53,19 @@ namespace MultiThreadingExample
 
             threads.Add(new Thread(() =>
             {
-                int firstId = masterService.Search(new Func<User, bool>[] { u => true }).FirstOrDefault();
+                int firstId = masterService.Search(u => true).FirstOrDefault();
                 masterService.Delete(firstId);
             }));
 
             threads.Add(new Thread(() =>
             {
-                int lastId = masterService.Search(new Func<User, bool>[] { u => true }).LastOrDefault();
+                int lastId = masterService.Search(u => true).LastOrDefault();
                 masterService.Delete(lastId);
             }));
 
             threads.Add(new Thread(() =>
             {
-                masterService.Search(new Func<User, bool>[] { u => true });
+                masterService.Search(u => true);
             }));
 
             foreach (var thread in threads)

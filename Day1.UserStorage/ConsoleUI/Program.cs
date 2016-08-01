@@ -28,7 +28,7 @@ namespace ConsoleUI
             { typeof(IUserLoader), new InstanceInfo(typeof(UserXmlLoader).AssemblyQualifiedName) },
             { typeof(ILogService), new InstanceInfo(typeof(LogService).AssemblyQualifiedName) },
             { typeof(ISender), new InstanceInfo(typeof(Sender).AssemblyQualifiedName, new[] { new[] { new ConnectionInfo("127.0.0.1", 131) } }) },
-            { typeof(IReceiver), new InstanceInfo(typeof(Receiver).AssemblyQualifiedName, new[] { new ConnectionInfo("127.0.0.1", 131) }) },
+            { typeof(IReceiver), new InstanceInfo(typeof(Receiver).AssemblyQualifiedName, new[] { new ConnectionInfo("127.0.0.1", 131) }) }
         };
 
         public static IDependencyCreator Creator => new DependencyCreator(
@@ -74,7 +74,7 @@ namespace ConsoleUI
             while (!endWork)
             {
                 master.Add(new User { FirstName = "Test", LastName = "LTest" });
-                int firstId = master.Search(new Func<User, bool>[] { u => true }).FirstOrDefault();
+                int firstId = master.Search(u => true).FirstOrDefault();
                 master.Delete(firstId);
                 Thread.Sleep(1000);
             }
@@ -84,7 +84,7 @@ namespace ConsoleUI
         {
             while (!endWork)
             {
-                slave.Search(new Func<User, bool>[] { u => u.FirstName == "Test" });
+                slave.Search(u => u.FirstName == "Test");
                 Thread.Sleep(1000);
             }
         }

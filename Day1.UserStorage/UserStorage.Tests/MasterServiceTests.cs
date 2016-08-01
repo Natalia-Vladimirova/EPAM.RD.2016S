@@ -63,7 +63,7 @@ namespace UserStorage.Tests
             var master = new MasterService(Creator);
             master.Load();
             var user = master.GetAll().First();
-            var foundUsers = master.Search(new Func<User, bool>[] { u => u.LastName == user.LastName });
+            var foundUsers = master.Search(u => u.LastName == user.LastName);
 
             // assert
             CollectionAssert.AreEqual(new List<int> { user.PersonalId }, foundUsers.ToList());
@@ -76,7 +76,7 @@ namespace UserStorage.Tests
             var master = new MasterService(Creator);
             master.Load();
             var user = master.GetAll().First();
-            var foundUsers = master.Search(new Func<User, bool>[] { u => u.LastName == user.LastName, u => u.PersonalId == user.PersonalId + 1 });
+            var foundUsers = master.Search(u => u.LastName == user.LastName && u.PersonalId == user.PersonalId + 1);
 
             // assert
             CollectionAssert.AreEqual(new List<int>(), foundUsers.ToList());

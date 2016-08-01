@@ -24,6 +24,7 @@ namespace Configurator
         public void Start()
         {
             StartupServicesConfigSection servicesSection = (StartupServicesConfigSection)ConfigurationManager.GetSection("StartupServices");
+            StartupIpConfigSection ipsSection = (StartupIpConfigSection)ConfigurationManager.GetSection("IpList");
 
             if (servicesSection == null)
             {
@@ -47,7 +48,6 @@ namespace Configurator
 
             string masterType = string.Empty;
             string masterHostAddress = string.Empty;
-            var slavesInfo = new List<ConnectionInfo>();
             slaveHosts = new List<WcfHost>();
 
             for (int i = 0; i < servicesSection.Services.Count; i++)
@@ -59,19 +59,31 @@ namespace Configurator
                 }
                 else
                 {
-                    var connectionInfo = new ConnectionInfo(servicesSection.Services[i].IpAddress, servicesSection.Services[i].Port);
-                    slavesInfo.Add(connectionInfo);
-
                     var slaveDependencies = new Dictionary<Type, InstanceInfo>();
                     slaveDependencies.Add(typeof(IUserLoader), new InstanceInfo(servicesSection.Loader.Type));
                     slaveDependencies.Add(typeof(ILogService), new InstanceInfo(servicesSection.Logger.Type));
-                    slaveDependencies.Add(typeof(IReceiver), new InstanceInfo(servicesSection.Receiver.Type, connectionInfo));
+                    slaveDependencies.Add(typeof(IReceiver), new InstanceInfo(servicesSection.Receiver.Type, new ConnectionInfo(servicesSection.Services[i].IpAddress, servicesSection.Services[i].Port)));
 
                     var slaveHost = CreateServiceHost(
                         servicesSection.Services[i].ServiceType, 
                         new DependencyCreator(slaveDependencies, null), 
                         servicesSection.Services[i].HostAddress);
                     slaveHosts.Add(slaveHost);
+                }
+            }
+
+            if (masterCount == 0)
+            {
+                return;
+            }
+
+            var slavesInfo = new List<ConnectionInfo>();
+
+            if (ipsSection.Ips != null)
+            {
+                for (int i = 0; i < ipsSection.Ips.Count; i++)
+                {
+                    slavesInfo.Add(new ConnectionInfo(ipsSection.Ips[i].Address, ipsSection.Ips[i].Port));
                 }
             }
 
@@ -83,9 +95,12 @@ namespace Configurator
 
             var validators = new List<InstanceInfo>();
 
-            for (int j = 0; j < servicesSection.Validators.Count; j++)
+            if (servicesSection.Validators != null)
             {
-                validators.Add(new InstanceInfo(servicesSection.Validators[j].Type));
+                for (int j = 0; j < servicesSection.Validators.Count; j++)
+                {
+                    validators.Add(new InstanceInfo(servicesSection.Validators[j].Type));
+                }
             }
 
             masterHost = CreateServiceHost(
@@ -96,10 +111,14 @@ namespace Configurator
 
         public void End()
         {
-            masterHost.Close();
-            foreach (var slaveHost in slaveHosts)
+            masterHost?.Close();
+
+            if (slaveHosts != null)
             {
-                slaveHost.Close();
+                foreach (var slaveHost in slaveHosts)
+                {
+                    slaveHost.Close();
+                }
             }
         }
         

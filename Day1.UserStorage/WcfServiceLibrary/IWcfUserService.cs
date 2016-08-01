@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ServiceModel;
 using UserStorage.Interfaces.Entities;
 
@@ -13,8 +12,8 @@ namespace WcfServiceLibrary
 
         [OperationContract]
         void Delete(int personalId);
-
+        
         [OperationContract]
-        IList<int> Search(Func<User, bool>[] criteria);
+        IList<int> Search(User criteria);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel;
+using UserStorage.Interfaces.Criteria;
 using UserStorage.Interfaces.Entities;
 using UserStorage.Interfaces.Services;
 
@@ -20,7 +21,7 @@ namespace WcfServiceLibrary
 
             this.userService = userService;
         }
-        
+
         public int Add(User user)
         {
             return userService.Add(user);
@@ -31,9 +32,9 @@ namespace WcfServiceLibrary
             userService.Delete(personalId);
         }
 
-        public IList<int> Search(Func<User, bool>[] criteria)
+        public IList<int> Search(User criteria)
         {
-            return userService.Search(criteria);
+            return userService.Search(u => u.Compare(criteria));
         }
     }
 }

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Criteria\UserSearchCriteria.cs" />
     <Compile Include="Entities\Gender.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Entities\Visa.cs" />

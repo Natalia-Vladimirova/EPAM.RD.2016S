@@ -40,7 +40,7 @@ namespace UserStorage.Tests
             // act
             var slave = new SlaveService(Creator);
             var user = slave.GetAll().First();
-            var foundUsers = slave.Search(new Func<User, bool>[] { u => u.LastName == user.LastName });
+            var foundUsers = slave.Search(u => u.LastName == user.LastName);
             slave.StopListen();
 
             // assert

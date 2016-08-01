@@ -15,9 +15,11 @@ namespace WcfServiceLibrary
             Uri baseAddress = new Uri(address);
             var service = new WcfUserService(userService);
             host = new ServiceHost(service, baseAddress);
-            ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
-            smb.HttpGetEnabled = true;
-            smb.MetadataExporter.PolicyVersion = PolicyVersion.Policy15;
+            ServiceMetadataBehavior smb = new ServiceMetadataBehavior
+            {
+                HttpGetEnabled = true,
+                MetadataExporter = { PolicyVersion = PolicyVersion.Policy15 }
+            };
             host.Description.Behaviors.Add(smb);
 
             (userService as IServiceLoader)?.Load();

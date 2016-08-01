@@ -67,9 +67,6 @@
     <None Include="Service References\MasterServiceReference\master3.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\MasterServiceReference\master4.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Service References\MasterServiceReference\WcfUserService.wsdl" />
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@ namespace UserStorage.Interfaces.Services
 
         void Delete(int personalId);
 
-        IList<int> Search(Func<User, bool>[] criteria);
+        IList<int> Search(Func<User, bool> criteria);
 
         IList<User> GetAll();
     }
