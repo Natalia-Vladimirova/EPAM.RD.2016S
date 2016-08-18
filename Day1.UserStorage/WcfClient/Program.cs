@@ -9,10 +9,22 @@ namespace WcfClient
         {
             WcfUserServiceClient client = new WcfUserServiceClient("BasicHttpBinding_IWcfUserService");
 
-            int id = client.Add(new User { FirstName = "Test", LastName = "LTest" });
-            client.Search(null);
-            client.Delete(id);
-            client.Search(null);
+            while (true)
+            {
+                int id = client.Add(new User { FirstName = "Test", LastName = "LTest" });
+                client.Search(null);
+                client.Delete(id);
+                client.Search(null);
+
+                Console.WriteLine("Press <Enter> to continue.");
+                Console.WriteLine("Press other key to stop loop.");
+                var key = Console.ReadKey();
+                Console.WriteLine();
+                if (key.Key != ConsoleKey.Enter)
+                {
+                    break;
+                }
+            }
 
             Console.WriteLine("Press <Enter> to exit.");
             Console.ReadLine();

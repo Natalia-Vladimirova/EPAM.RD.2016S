@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<StorageState>
+  <LastId>3</LastId>
+  <ArrayOfXmlUser xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <XmlUser>
+      <PersonalId>1</PersonalId>
+      <FirstName>Jane</FirstName>
+      <LastName>Smith</LastName>
+      <DateOfBirth>1996-05-05</DateOfBirth>
+      <Gender>1</Gender>
+      <ArrayOfXmlVisa>
+        <XmlVisa>
+          <Country>Britain</Country>
+          <Start>2015-08-06</Start>
+          <End>2015-09-16</End>
+        </XmlVisa>
+        <XmlVisa>
+          <Country>Germany</Country>
+          <Start>2016-01-05</Start>
+          <End>2016-02-22</End>
+        </XmlVisa>
+      </ArrayOfXmlVisa>
+    </XmlUser>
+    <XmlUser>
+      <PersonalId>2</PersonalId>
+      <FirstName>Tom</FirstName>
+      <LastName>Reddle</LastName>
+      <DateOfBirth>1995-07-03</DateOfBirth>
+      <Gender>0</Gender>
+      <ArrayOfXmlVisa>
+        <XmlVisa>
+          <Country>Russia</Country>
+          <Start>2014-03-01</Start>
+          <End>2015-03-22</End>
+        </XmlVisa>
+      </ArrayOfXmlVisa>
+    </XmlUser>
+    <XmlUser>
+      <PersonalId>3</PersonalId>
+      <FirstName>Kate</FirstName>
+      <LastName>Brown</LastName>
+      <DateOfBirth>1995-04-13</DateOfBirth>
+      <Gender>1</Gender>
+      <ArrayOfXmlVisa />
+    </XmlUser>
+  </ArrayOfXmlUser>
+</StorageState>
