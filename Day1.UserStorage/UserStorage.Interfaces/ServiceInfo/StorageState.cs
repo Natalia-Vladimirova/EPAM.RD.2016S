@@ -9,10 +9,19 @@ using UserStorage.Interfaces.XmlEntities;
 
 namespace UserStorage.Interfaces.ServiceInfo
 {
+    /// <summary>
+    /// Used to contain users and last id of user.
+    /// </summary>
     public class StorageState : IXmlSerializable
     {
+        /// <summary>
+        /// Returns last user id.
+        /// </summary>
         public int LastId { get; set; }
 
+        /// <summary>
+        /// Returns collection of users.
+        /// </summary>
         public List<User> Users { get; set; }
 
         public XmlSchema GetSchema()

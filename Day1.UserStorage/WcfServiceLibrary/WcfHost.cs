@@ -5,11 +5,23 @@ using UserStorage.Interfaces.Services;
 
 namespace WcfServiceLibrary
 {
+    /// <summary>
+    /// Represents wcf host for user service.
+    /// </summary>
     public class WcfHost : MarshalByRefObject
     {
         private ServiceHost host;
         private IUserService userService;
 
+        /// <summary>
+        /// Starts wcf host on given address.
+        /// </summary>
+        /// <param name="address">
+        /// Address which wcf host will start on.
+        /// </param>
+        /// <param name="userService">
+        /// Service that will work inside wcf host.
+        /// </param>
         public void Start(string address, IUserService userService)
         {
             Uri baseAddress = new Uri(address);
@@ -33,6 +45,9 @@ namespace WcfServiceLibrary
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Closes wcf host.
+        /// </summary>
         public void Close()
         {
             host.Close();

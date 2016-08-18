@@ -14,6 +14,9 @@ using UserStorage.Interfaces.Validators;
 
 namespace UserStorage.Services
 {
+    /// <summary>
+    /// Master user service that can add, delete, search users and send messages to slave services.
+    /// </summary>
     [Serializable]
     public class MasterService : MarshalByRefObject, IUserService, IServiceLoader
     {
@@ -25,6 +28,12 @@ namespace UserStorage.Services
         private readonly IEnumerable<IValidator> validators;
         private IList<User> users;
 
+        /// <summary>
+        /// Creates an instance of MasterService with necessary dependency creator.
+        /// </summary>
+        /// <param name="creator">
+        /// Creator that contains information about types of logger, id generator, loader, sender and validators.
+        /// </param>
         public MasterService(IDependencyCreator creator)
         {
             if (creator == null)
@@ -63,6 +72,15 @@ namespace UserStorage.Services
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
 
+        /// <summary>
+        /// Adds user to local service collection.
+        /// </summary>
+        /// <param name="user">
+        /// User to add.
+        /// </param>
+        /// <returns>
+        /// Id of added user.
+        /// </returns>
         public int Add(User user)
         {
             if (validators.Any(validator => !validator?.IsValid(user) ?? false))
@@ -87,6 +105,12 @@ namespace UserStorage.Services
             }
         }
 
+        /// <summary>
+        /// Deletes user from local service collection.
+        /// </summary>
+        /// <param name="personalId">
+        /// Id of user to delete.
+        /// </param>
         public void Delete(int personalId)
         {
             readerWriterLock.EnterWriteLock();
@@ -106,6 +130,15 @@ namespace UserStorage.Services
             }
         }
 
+        /// <summary>
+        /// Searches user in local service collection by criteria.
+        /// </summary>
+        /// <param name="criteria">
+        /// Search criteria.
+        /// </param>
+        /// <returns>
+        /// List of id of found users.
+        /// </returns>
         public IList<int> Search(Func<User, bool> criteria)
         {
             readerWriterLock.EnterReadLock();
@@ -121,12 +154,21 @@ namespace UserStorage.Services
             }
         }
 
+        /// <summary>
+        /// Gets all users from local service collection.
+        /// </summary>
+        /// <returns>
+        /// List of all users.
+        /// </returns>
         public IList<User> GetAll()
         {
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tgetting all users.");
             return users;
         }
 
+        /// <summary>
+        /// Loads collection of users to local service collection using service loader.
+        /// </summary>
         public void Load()
         {
             readerWriterLock.EnterWriteLock();
@@ -143,6 +185,9 @@ namespace UserStorage.Services
             }
         }
 
+        /// <summary>
+        /// Saves local service collection of users using service loader.
+        /// </summary>
         public void Save()
         {
             readerWriterLock.EnterWriteLock();

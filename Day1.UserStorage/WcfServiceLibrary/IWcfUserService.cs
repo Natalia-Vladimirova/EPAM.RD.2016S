@@ -4,6 +4,9 @@ using UserStorage.Interfaces.Entities;
 
 namespace WcfServiceLibrary
 {
+    /// <summary>
+    /// Represents user service contract.
+    /// </summary>
     [ServiceContract]
     public interface IWcfUserService
     {

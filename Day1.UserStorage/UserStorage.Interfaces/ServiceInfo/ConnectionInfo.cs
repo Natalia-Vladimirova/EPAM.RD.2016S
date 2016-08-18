@@ -3,9 +3,17 @@ using System.Net;
 
 namespace UserStorage.Interfaces.ServiceInfo
 {
+    /// <summary>
+    /// Used to contain information about ip address and port.
+    /// </summary>
     [Serializable]
     public class ConnectionInfo
     {
+        /// <summary>
+        /// Creates an instance of ConnectionInfo with specified ip address and port.
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="port"></param>
         public ConnectionInfo(string address, int port)
         {
             IPAddress parsedAddress;

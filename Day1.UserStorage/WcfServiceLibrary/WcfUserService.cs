@@ -7,11 +7,20 @@ using UserStorage.Interfaces.Services;
 
 namespace WcfServiceLibrary
 {
+    /// <summary>
+    /// Represents wcf service that uses user service.
+    /// </summary>
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class WcfUserService : MarshalByRefObject, IWcfUserService
     {
         private readonly IUserService userService;
 
+        /// <summary>
+        /// Creates an instance of WcfUserService with necessary user service.
+        /// </summary>
+        /// <param name="userService">
+        /// Service that will work inside wcf user service.
+        /// </param>
         public WcfUserService(IUserService userService)
         {
             if (userService == null)

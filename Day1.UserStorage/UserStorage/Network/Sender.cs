@@ -8,31 +8,46 @@ using UserStorage.Interfaces.ServiceInfo;
 
 namespace UserStorage.Network
 {
+    /// <summary>
+    /// Used to send messages using tcp connection.
+    /// </summary>
     public class Sender : ISender
     {
-        private readonly IEnumerable<ConnectionInfo> slavesInfo;
+        private readonly IEnumerable<ConnectionInfo> connectionInfo;
 
-        public Sender(IEnumerable<ConnectionInfo> slavesInfo)
+        /// <summary>
+        /// Creates an instance of tcp sender with necessary connection info.
+        /// </summary>
+        /// <param name="connectionInfo">
+        /// Contains information about ip addresses and ports where tcp sender will send messages.
+        /// </param>
+        public Sender(IEnumerable<ConnectionInfo> connectionInfo)
         {
-            if (slavesInfo == null)
+            if (connectionInfo == null)
             {
-                throw new ArgumentNullException($"{nameof(slavesInfo)} must be not null.");
+                throw new ArgumentNullException($"{nameof(connectionInfo)} must be not null.");
             }
 
-            this.slavesInfo = slavesInfo;
+            this.connectionInfo = connectionInfo;
         }
-        
+
+        /// <summary>
+        /// Sends messages using given addresses and ports via tcp connection.
+        /// </summary>
+        /// <param name="message">
+        /// Message to send.
+        /// </param>
         public async void SendMessage(ServiceMessage message)
         {
             var serializer = new JavaScriptSerializer();
             string serializedMessage = serializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(serializedMessage);
 
-            foreach (var slave in slavesInfo)
+            foreach (var info in connectionInfo)
             {
                 using (TcpClient client = new TcpClient())
                 {
-                    await client.ConnectAsync(slave.IPAddress, slave.Port);
+                    await client.ConnectAsync(info.IPAddress, info.Port);
                     using (NetworkStream stream = client.GetStream())
                     {
                         await stream.WriteAsync(data, 0, data.Length);

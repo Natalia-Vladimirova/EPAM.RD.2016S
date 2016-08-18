@@ -5,18 +5,36 @@ using UserStorage.Interfaces.Creators;
 
 namespace Configurator.Creators
 {
+    /// <summary>
+    /// Used to create instances associated with interfaces.
+    /// </summary>
     [Serializable]
     public class DependencyCreator : IDependencyCreator
     {
         private readonly Dictionary<Type, InstanceInfo> typesSingle;
         private readonly Dictionary<Type, List<InstanceInfo>> typesList;
-
+        
+        /// <summary>
+        /// Creates an instance of DependencyCreator with specified types.
+        /// </summary>
+        /// <param name="typesSingle">
+        /// Contains information that associates interface with concrete type and parameters need to create object.
+        /// </param>
+        /// <param name="typesList">
+        /// Contains information that associates interface with concrete type and parameters need to create list of objects.
+        /// </param>
         public DependencyCreator(Dictionary<Type, InstanceInfo> typesSingle, Dictionary<Type, List<InstanceInfo>> typesList)
         {
             this.typesSingle = typesSingle;
             this.typesList = typesList;
         }
 
+        /// <summary>
+        /// Creates a definite single object that implements interface T.
+        /// </summary>
+        /// <returns>
+        /// Object implementing interface T.
+        /// </returns>
         public T CreateInstance<T>()
         {
             if (typesSingle == null)
@@ -28,6 +46,12 @@ namespace Configurator.Creators
             return Create<T>(info);
         }
 
+        /// <summary>
+        /// Creates a list of definite objects that implement interface T.
+        /// </summary>
+        /// <returns>
+        /// List of objects implementing interface T.
+        /// </returns>
         public IEnumerable<T> CreateListOfInstances<T>()
         {
             if (typesList == null)

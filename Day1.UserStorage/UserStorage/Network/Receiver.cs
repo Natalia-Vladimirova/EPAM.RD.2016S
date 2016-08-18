@@ -7,18 +7,33 @@ using UserStorage.Interfaces.ServiceInfo;
 
 namespace UserStorage.Network
 {
+    /// <summary>
+    /// Used to receive messages using tcp connection.
+    /// </summary>
     public class Receiver : IReceiver
     {
         private readonly TcpListener server;
 
+        /// <summary>
+        /// Creates an instance of tcp receiver with necessary connection info.
+        /// </summary>
+        /// <param name="info">
+        /// Contains information about ip address and port which tcp receiver will start on.
+        /// </param>
         public Receiver(ConnectionInfo info)
         {
             server = new TcpListener(info.IPAddress, info.Port);
             server.Start();
         }
 
+        /// <summary>
+        /// Updating is raised whenever message is received.
+        /// </summary>
         public event EventHandler<UserEventArgs> Updating = delegate { };
 
+        /// <summary>
+        /// Starts receiving messages via tcp connection.
+        /// </summary>
         public async void StartReceivingMessages()
         {
             var serializer = new JavaScriptSerializer();
@@ -58,6 +73,9 @@ namespace UserStorage.Network
             }
         }
 
+        /// <summary>
+        /// Stops receiving messages.
+        /// </summary>
         public void StopReceiver()
         {
             server.Stop();

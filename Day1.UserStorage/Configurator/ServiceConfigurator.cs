@@ -16,11 +16,17 @@ using WcfServiceLibrary;
 
 namespace Configurator
 {
+    /// <summary>
+    /// Used to configure master and slave hosts using App.config.
+    /// </summary>
     public class ServiceConfigurator
     {
         private WcfHost masterHost;
         private List<WcfHost> slaveHosts;
 
+        /// <summary>
+        /// Creates and configures master and slave services using data from App.config; creates and starts wcf hosts for these services.
+        /// </summary>
         public void Start()
         {
             StartupServicesConfigSection servicesSection = (StartupServicesConfigSection)ConfigurationManager.GetSection("StartupServices");
@@ -109,6 +115,9 @@ namespace Configurator
                 masterHostAddress);
         }
 
+        /// <summary>
+        /// Ends work of  master and slave hosts.
+        /// </summary>
         public void End()
         {
             masterHost?.Close();

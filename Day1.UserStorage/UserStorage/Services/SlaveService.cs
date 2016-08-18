@@ -12,6 +12,9 @@ using UserStorage.Interfaces.Services;
 
 namespace UserStorage.Services
 {
+    /// <summary>
+    /// Slave user service that can search users and receive messages from master service.
+    /// </summary>
     [Serializable]
     public class SlaveService : MarshalByRefObject, IUserService, IListener
     {
@@ -20,6 +23,12 @@ namespace UserStorage.Services
         private readonly IReceiver receiver;
         private readonly IList<User> users;
 
+        /// <summary>
+        /// Creates an instance of SlaveService with necessary dependency creator.
+        /// </summary>
+        /// <param name="creator">
+        /// Creator that contains information about types of logger, loader and receiver.
+        /// </param>
         public SlaveService(IDependencyCreator creator)
         {
             if (creator == null)
@@ -62,6 +71,10 @@ namespace UserStorage.Services
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tslave service created.");
         }
 
+        /// <summary>
+        /// Throws an exception when trying to add user.
+        /// </summary>
+        /// <exception cref="AccessViolationException">Thrown when trying to add user.</exception>
         public int Add(User user)
         {
             receiver.StopReceiver();
@@ -69,6 +82,10 @@ namespace UserStorage.Services
             throw new AccessViolationException("Slave cannot write to storage.");
         }
 
+        /// <summary>
+        /// Throws an exception when trying to delete user.
+        /// </summary>
+        /// <exception cref="AccessViolationException">Thrown when trying to delete user.</exception>
         public void Delete(int personalId)
         {
             receiver.StopReceiver();
@@ -76,6 +93,15 @@ namespace UserStorage.Services
             throw new AccessViolationException("Slave cannot delete from storage.");
         }
 
+        /// <summary>
+        /// Searches user in local service collection by criteria.
+        /// </summary>
+        /// <param name="criteria">
+        /// Search criteria.
+        /// </param>
+        /// <returns>
+        /// List of id of found users.
+        /// </returns>
         public IList<int> Search(Func<User, bool> criteria)
         {
             readerWriterLock.EnterReadLock();
@@ -91,18 +117,30 @@ namespace UserStorage.Services
             }
         }
 
+        /// <summary>
+        /// Gets all users from local service collection.
+        /// </summary>
+        /// <returns>
+        /// List of all users.
+        /// </returns>
         public IList<User> GetAll()
         {
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tgetting all users.");
             return users;
         }
 
+        /// <summary>
+        /// Starts listening for updates from master service.
+        /// </summary>
         public void ListenForUpdates()
         {
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tstart receiving messages.");
             receiver.StartReceivingMessages();
         }
 
+        /// <summary>
+        /// Stops listening for updates from master service.
+        /// </summary>
         public void StopListen()
         {
             logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tstop receiving messages.");
